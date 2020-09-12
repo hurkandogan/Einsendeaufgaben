@@ -3,7 +3,6 @@ This is one of my Java Projects.<br>
 It is an order system with CRUD functionality.<br>
 It is using Java Swing Framework for GUI. (javax.swing.*)<br>
 Application is connected to a MySQL server on local machine.<br>
-ORM codes are written by me instead of a framework. It was the 
 
 I'm working on this project only for education purposes for my school.
 <hr>
