@@ -19,14 +19,15 @@ public class Anmeldung extends JFrame implements ActionListener {
         super(title);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.createGUI();
-        this.setSize(800, 400);
+        this.setSize(600, 400);
+        this.setLocation(50, 50);
         this.setVisible(true);
     }
 
     public void createGUI(){
         // Labels
         jlHeadline = new JLabel("Personalverwaltung - Zugang nur für Abteilungsleiter", JLabel.CENTER);
-        jlHeadline.setFont(new Font("Serif", Font.BOLD, 30));
+        jlHeadline.setFont(new Font("Serif", Font.BOLD, 25));
         jlHeadline.setForeground(Color.BLUE);
         jlHeadline.setHorizontalTextPosition(SwingConstants.CENTER);
         jlFirstname = new JLabel("Vorname");
@@ -39,7 +40,7 @@ public class Anmeldung extends JFrame implements ActionListener {
         jpfPassword = new JPasswordField();
         jtfDBUsername = new JTextField(defaultDBUser);
         jtfStatus = new JTextField("Status Field");
-        jtfStatus.setFont(new Font("Monospaced", Font.PLAIN, 10));
+        jtfStatus.setFont(new Font("Monospaced", Font.PLAIN, 12));
         jtfStatus.setForeground(Color.WHITE);
         jtfStatus.setBackground(Color.BLACK);
         jtfStatus.setEditable(false);
@@ -51,27 +52,31 @@ public class Anmeldung extends JFrame implements ActionListener {
 
         // Content Create
         JPanel jPanelHeadline = new JPanel(new GridLayout(1,1,20,20));
-        jPanelHeadline.setBorder(BorderFactory.createEtchedBorder());
         jPanelHeadline.add(jlHeadline);
         this.add(BorderLayout.NORTH, jPanelHeadline);
 
-        JPanel jPanelMain = new JPanel(new GridLayout(1, 3, 20, 20));
+        JPanel jPanelMain = new JPanel(new GridLayout(1,3));
+        jPanelMain.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 
-        JPanel jPanelLeft = new JPanel(new GridLayout(4, 1, 10, 10));
+        JPanel jPanelLeft = new JPanel(new GridLayout(4, 1, 5, 5));
+        jPanelLeft.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
         jPanelLeft.add(jlFirstname);
         jPanelLeft.add(jtfFirstname);
+        jtfFirstname.setPreferredSize(new Dimension(20,10));
         jPanelLeft.add(new JLabel());
         jPanelLeft.add(new JLabel());
         jPanelMain.add(jPanelLeft);
 
-        JPanel jPanelCenter = new JPanel(new GridLayout(4, 1, 10, 10));
+        JPanel jPanelCenter = new JPanel(new GridLayout(4, 1, 5, 5));
+        jPanelCenter.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
         jPanelCenter.add(jlLastname);
         jPanelCenter.add(jtfLastname);
         jPanelCenter.add(jlDbUsername);
         jPanelCenter.add(jbLogin);
         jPanelMain.add(jPanelCenter);
 
-        JPanel jPanelRight = new JPanel(new GridLayout(4, 1, 10, 10));
+        JPanel jPanelRight = new JPanel(new GridLayout(4, 1, 5, 5));
+        jPanelRight.setBorder(BorderFactory.createEmptyBorder(5,20,5,5));
         jPanelRight.add(jlPassword);
         jPanelRight.add(jpfPassword);
         jPanelRight.add(jtfDBUsername);
@@ -94,7 +99,11 @@ public class Anmeldung extends JFrame implements ActionListener {
     }
 
     public void loginAction(){
-        System.out.println("Login Button clicked");
+        String name = jtfFirstname.getText();
+        String lastName = jtfLastname.getText();
+        char[] password = jpfPassword.getPassword();
+        String dbUser = jtfDBUsername.getText();
+        jtfStatus.setText("Isim: " + name + " Soyisim: " + lastName);
     }
 
     public void exitAction(){
