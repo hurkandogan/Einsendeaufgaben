@@ -14,7 +14,7 @@ public class ConnectionManager {
     private static boolean logger = true;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd HH:mm:ss");
 
-    public static synchronized Connection getConnection(String host, String user, String passwort) throws ClassNotFoundException, SQLException {
+    public static synchronized Connection getConnection(String host, String user, String passwort) {
         try {
             Class.forName("org.gjt.mm.mysql.Driver").newInstance();
             String mysqlJdbcConnectionUrl = mysqlJdbcConnectionProtocol + host + database;
@@ -34,12 +34,6 @@ public class ConnectionManager {
      * @param args
      */
     public static void main(String[] args) {
-        try {
             Connection conn = ConnectionManager.getConnection("localhost", "demo-user", "");
-        } catch (ClassNotFoundException cnfe) {
-            System.out.println(cnfe.getMessage());
-        } catch (SQLException sqle) {
-            System.out.println(sqle.getMessage());
-        }
     }
 }

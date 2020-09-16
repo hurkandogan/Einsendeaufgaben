@@ -16,6 +16,10 @@ public class Anmeldung extends JFrame implements ActionListener {
     private JButton jbLogin, jbExit;
     private String defaultDBUser = "demo-user";
 
+    // DB Connection
+    ConnectionManager conn = new ConnectionManager();
+    Connection connection = conn.getConnection("localhost", "demo-user", "");
+
     // Constructor
     public Anmeldung(String title) {
         super(title);
@@ -101,12 +105,10 @@ public class Anmeldung extends JFrame implements ActionListener {
     }
 
     public void loginAction(){
-        ConnectionManager conn = new ConnectionManager();
         String name = jtfFirstname.getText();
         String lastName = jtfLastname.getText();
         try{
             String queryString = "SELECT * FROM personen WHERE vorname = '" + name + "' AND nachname = '" + lastName + "'";
-            Connection connection = conn.getConnection("localhost", "demo-user", "");
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(queryString);
             while(rs.next()){
@@ -118,9 +120,6 @@ public class Anmeldung extends JFrame implements ActionListener {
         }catch(SQLException sqle){
             jtfStatus.setText(sqle.getMessage());
             System.out.println(sqle.getMessage());
-        }catch(ClassNotFoundException cnfe){
-            jtfStatus.setText(cnfe.getMessage());
-            System.out.println(cnfe.getMessage());
         }
 
 
