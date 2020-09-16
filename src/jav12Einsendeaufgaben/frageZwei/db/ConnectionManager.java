@@ -28,8 +28,9 @@ public class ConnectionManager {
     }
 
     /**
-     * TODO: Get Connection iyilestirilmeli
-     * TODO: Close Connection metodu!
+     * TODO: Get Connection needs improvements
+     * TODO: Close Connection method
+     * TODO: Release Connection Methods
      * @param args
      */
     public static void main(String[] args) {
