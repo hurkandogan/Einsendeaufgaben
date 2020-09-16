@@ -2,8 +2,10 @@ package jav12Einsendeaufgaben.frageZwei;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import jav12Einsendeaufgaben.frageZwei.db.ConnectionManager;
 
 public class Anmeldung extends JFrame implements ActionListener {
 
@@ -99,14 +101,37 @@ public class Anmeldung extends JFrame implements ActionListener {
     }
 
     public void loginAction(){
+        ConnectionManager conn = new ConnectionManager();
         String name = jtfFirstname.getText();
         String lastName = jtfLastname.getText();
-        char[] password = jpfPassword.getPassword();
-        String dbUser = jtfDBUsername.getText();
-        jtfStatus.setText("Isim: " + name + " Soyisim: " + lastName);
+        try{
+            String queryString = "SELECT * FROM personen WHERE vorname = '" + name + "' AND nachname = '" + lastName + "'";
+            Connection connection = conn.getConnection("localhost", "demo-user", "");
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(queryString);
+            while(rs.next()){
+                String vorname = rs.getString("vorname");
+                String nachname = rs.getString("nachname");
+                jtfStatus.setText("Welcome " + vorname + " " + nachname);
+                System.out.println("Works!");
+            }
+        }catch(SQLException sqle){
+            jtfStatus.setText(sqle.getMessage());
+            System.out.println(sqle.getMessage());
+        }catch(ClassNotFoundException cnfe){
+            jtfStatus.setText(cnfe.getMessage());
+            System.out.println(cnfe.getMessage());
+        }
+
+
+//        char[] password = jpfPassword.getPassword();
+//        String dbUser = jtfDBUsername.getText();
+//        jtfStatus.setText("Isim: " + name + " Soyisim: " + lastName);
     }
 
     public void exitAction(){
+        this.dispose();
+        System.exit(0);
         System.out.println("Exit Button clicked");
     }
 
