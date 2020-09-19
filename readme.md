@@ -1,6 +1,6 @@
-<h2>Ordering System</h2><br>
-This is one of my Java Projects.<br>
-It is an order system with CRUD functionality.<br>
+<h2>Team Management System</h2><br>
+This is one of my Java Projects that I created for my school.<br>
+It is a team management with CRUD functionality.<br>
 It is using Java Swing Framework for GUI. (javax.swing.*)<br>
 Application is connected to a MySQL server on local machine.<br>
 
