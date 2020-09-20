@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Angestellter;
+import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Person;
 
 public class Anmeldung extends JFrame implements ActionListener {
 
@@ -18,6 +20,8 @@ public class Anmeldung extends JFrame implements ActionListener {
     private String defaultDBUser = "demo-user";
 
     private DbManager dbManager;
+
+    private Angestellter angestellter;
 
     // Constructor
     public Anmeldung(String title) {
@@ -108,8 +112,17 @@ public class Anmeldung extends JFrame implements ActionListener {
     }
 
     public void loginAction() {
+        this.getDbManager();
         String name = jtfFirstname.getText();
         String lastName = jtfLastname.getText();
+        Person person = new Person(name, lastName);
+        if(person.retrieveObject(dbManager)) {
+            Angestellter angestellter = new Angestellter(person);
+            angestellter.retrieveObject(dbManager);
+            jtfStatus.setText("Isim: " + angestellter.getPerson().getVorname() + " Abteilung: " + angestellter.getAbteilung());
+        } else {
+            jtfStatus.setText("Mit diesen Angaben ist niemand gefunden.");
+        }
 //        try{
 //            String queryString = "SELECT * FROM personen WHERE vorname = '" + name + "' AND nachname = '" + lastName + "'";
 //            Statement stmt = connection.createStatement();
@@ -124,11 +137,8 @@ public class Anmeldung extends JFrame implements ActionListener {
 //            jtfStatus.setText(sqle.getMessage());
 //            System.out.println(sqle.getMessage());
 //        }
-
-
 //        char[] password = jpfPassword.getPassword();
 //        String dbUser = jtfDBUsername.getText();
-//        jtfStatus.setText("Isim: " + name + " Soyisim: " + lastName);
     }
 
     public void exitAction() {
@@ -145,11 +155,11 @@ public class Anmeldung extends JFrame implements ActionListener {
                 jtfStatus.setText("Connection created.");
             }
         } catch(ClassNotFoundException cnfe) {
-            System.out.println(cnfe.getMessage());
-            jtfStatus.setText(cnfe.getMessage());
+            System.out.println("Anmeldung#getDbManager: " + cnfe.getMessage());
+            jtfStatus.setText("Anmeldung#getDbManager: " + cnfe.getMessage());
         } catch(SQLException sqle) {
-            System.out.println(sqle.getMessage());
-            jtfStatus.setText(sqle.getMessage());
+            System.out.println("Anmeldung#getDbManager: " + sqle.getMessage());
+            jtfStatus.setText("Anmeldung#getDbManager: " + sqle.getMessage());
         }
     }
 
