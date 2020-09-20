@@ -1,44 +1,50 @@
 package jav12Einsendeaufgaben.angestellterAnmeldung.db;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import jav12Einsendeaufgaben.angestellterAnmeldung.db.DbManager;
 
-/* Seit Lektion 4 haben die Methoden für Datenbankoperationen statt
- * dem Connection-Objekt ein DbManager-Objekt als Parameter. */
+/* Das Interface muss auch in dieses Projekt aufgenommen werden,
+ * da es den DbManager dieser Projektversion verwendet. Daher ist kein
+ * Import aus "lektion4" möglich.  */
 public interface PersistenzInterface extends Cloneable {
 
-	/* Persistenzeigenschaften */
+	/* Instanzen von Klassen, die diese Interface implementieren, koennen
+	 * persistent sein, muessen es aber nicht. Die Instanzen sind dann
+	 * persistent, wenn sie aus der Datenbank gelesen, oder in sie
+	 * hinein geschrieben wurden. Wenn sie aus der Datenbank geloescht wurden,
+	 * sind sie wieder transient.
+	 * Die Eigenschaft "persistent" verwaltet für ein Objekt seinen
+	 * Persistenzzustand. */
 	boolean isPersistent();
 	void    setPersistent( boolean newValue );
 
+	/* Solange ein persistentes Objekt in der Anwendung den gleichen Zustand
+	 * hat wie in der Datenbank, liefert "isModified" den Wert "false",
+	 * ansonsten "true". Es liefert also insbesondere dann "true", wenn der
+	 * Objektzustand durch eine set-Methode verändert wurde.  */
 	boolean isModified();
 	void    setModified( boolean newValue );
 
-	/* id-Eigenschaft für ale PI-Objekte ab Lektion 4 */
-	void setId(int id);
-	int getId();
-
 	/* Fügt das aktuelle Objekt in die Datenbank ein (SQL-INSERT). */
-	boolean insertObject(jav12Einsendeaufgaben.angestellterAnmeldung.db.DbManager dbManager);
-
-	/* Liest ein Objekt aus der Datenbank (SQL-SELECT).
-	 * In Lektion 5 erhält die Methode eine andere Rückgabe, um alternativ das
-	 * Original oder das Pufferobjekt durchreichen zu können. */
-	PersistenzInterface retrieveObject(jav12Einsendeaufgaben.angestellterAnmeldung.db.DbManager dbManager) throws SQLException;
-
-	/* Ändert den Objektzustand in der Datenbank (SQL-UPDATE).  */
-	boolean updateObject(jav12Einsendeaufgaben.angestellterAnmeldung.db.DbManager dbManager);
+	boolean insertObject(DbManager dbManager);
 
 	/* Löscht das aktuelle Objekt aus der Datenbank (SQL-DELETE). */
-	boolean deleteObject(jav12Einsendeaufgaben.angestellterAnmeldung.db.DbManager dbManager);
+	boolean deleteObject(DbManager dbManager);
+
+	/* Ändert den Objektzustand in der Datenbank (SQL-UPDATE).  */
+	boolean updateObject(DbManager dbManager);
+
+	/* Sucht und liest ein Objekt aus der Datenbank (SQL-SELECT).  */
+	boolean retrieveObject(DbManager dbManager);
 
 	/* SQL-String- und Verwaltungsmethoden - ab Lektion 4 */
+	String getDeleteSQL();
 	String getInsertSQL();
 	String getRetrieveSQL();
 	String getUpdateSQL();
-	String getDeleteSQL();
 
-	/* Läd die Properties (Eigenschaften) eines perssistenzfähigen Objekts aus
+	/*
+	 * Läd die Properties (Eigenschaften) eines persistenzfähigen Objekts aus
 	 * dem übergebenen ResaultSet-Objekt - Ergebnis einer Datenbankabfrage.
 	 * Der Methodenname kürzt "loadObjectProperties" ab. */
 	boolean loadObjProps(ResultSet rs);
@@ -50,8 +56,4 @@ public interface PersistenzInterface extends Cloneable {
 	 * Konstruktoren (bzw. deren Parameter) abgestimmt werden.  */
 	String getPufferKey();
 	void setPufferKey(String pufferKey);
-
-	PersistenzInterface clone() throws CloneNotSupportedException;
-
-	String getMessage();
 }
