@@ -2,11 +2,16 @@ package jav12Einsendeaufgaben.angestellterAnmeldung.daten;
 
 import jav12Einsendeaufgaben.angestellterAnmeldung.db.DbManager;
 import jav12Einsendeaufgaben.angestellterAnmeldung.db.PersistenzInterface;
+import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class Angestellter implements PersistenzInterface {
+
+	/* Message Fields */
+	private String message;
+	public String getMessage() { return message; }
 
 	/* ****** PI-Properties ****** */
 	private boolean persistent;
@@ -30,9 +35,9 @@ public class Angestellter implements PersistenzInterface {
 	public int getId() { return id; }
 	public void setId(int id) { this.id = id;  this.setModified(true); }
 
-	private jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung abteilung;
-	public jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung getAbteilung() { return abteilung; }
-	public void setAbteilung(jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung abteilung) { this.abteilung = abteilung;  this.setModified(true); }
+	private Abteilung abteilung;
+	public Abteilung getAbteilung() { return abteilung; }
+	public void setAbteilung(Abteilung abteilung) { this.abteilung = abteilung;  this.setModified(true); }
 
 	private String geschlecht;
 	public String getGeschlecht() { return geschlecht; }
@@ -41,10 +46,6 @@ public class Angestellter implements PersistenzInterface {
 	private Person person;
 	public Person getPerson() { return person; }
 	public void setPerson(Person person) { this.person = person;  this.setModified(true); }
-
-	/* weitere Felder */
-	private String message;
-	public String getMessage() { return message; }
 
 	/* ****** Datenbankoperationen ****** */
 	public boolean retrieveObject(DbManager dbManager) {

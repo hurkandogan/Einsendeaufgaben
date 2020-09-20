@@ -1,9 +1,12 @@
 package jav12Einsendeaufgaben.angestellterAnmeldung;
 
+import jav12Einsendeaufgaben.angestellterAnmeldung.db.DbManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 
 public class Anmeldung extends JFrame implements ActionListener {
 
@@ -14,9 +17,7 @@ public class Anmeldung extends JFrame implements ActionListener {
     private JButton jbLogin, jbExit;
     private String defaultDBUser = "demo-user";
 
-    // DB Connection
-    //ConnectionManager conn = new ConnectionManager();
-    //Connection connection = conn.getConnection("localhost", "demo-user", "");
+    private DbManager dbManager;
 
     // Constructor
     public Anmeldung(String title) {
@@ -28,7 +29,11 @@ public class Anmeldung extends JFrame implements ActionListener {
         this.setVisible(true);
     }
 
-    public void createGUI(){
+    public static void main(String[] args) {
+        new Anmeldung("Anmeldung");
+    }
+
+    public void createGUI() {
         // Labels
         jlHeadline = new JLabel("Personalverwaltung - Zugang nur für Abteilungsleiter", JLabel.CENTER);
         jlHeadline.setFont(new Font("Serif", Font.BOLD, 25));
@@ -55,24 +60,24 @@ public class Anmeldung extends JFrame implements ActionListener {
         jbExit.addActionListener(this);
 
         // Content Create
-        JPanel jPanelHeadline = new JPanel(new GridLayout(1,1,20,20));
+        JPanel jPanelHeadline = new JPanel(new GridLayout(1, 1, 20, 20));
         jPanelHeadline.add(jlHeadline);
         this.add(BorderLayout.NORTH, jPanelHeadline);
 
-        JPanel jPanelMain = new JPanel(new GridLayout(1,3));
-        jPanelMain.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        JPanel jPanelMain = new JPanel(new GridLayout(1, 3));
+        jPanelMain.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         JPanel jPanelLeft = new JPanel(new GridLayout(4, 1, 5, 5));
-        jPanelLeft.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        jPanelLeft.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         jPanelLeft.add(jlFirstname);
         jPanelLeft.add(jtfFirstname);
-        jtfFirstname.setPreferredSize(new Dimension(20,10));
+        jtfFirstname.setPreferredSize(new Dimension(20, 10));
         jPanelLeft.add(new JLabel());
         jPanelLeft.add(new JLabel());
         jPanelMain.add(jPanelLeft);
 
         JPanel jPanelCenter = new JPanel(new GridLayout(4, 1, 5, 5));
-        jPanelCenter.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        jPanelCenter.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         jPanelCenter.add(jlLastname);
         jPanelCenter.add(jtfLastname);
         jPanelCenter.add(jlDbUsername);
@@ -80,7 +85,7 @@ public class Anmeldung extends JFrame implements ActionListener {
         jPanelMain.add(jPanelCenter);
 
         JPanel jPanelRight = new JPanel(new GridLayout(4, 1, 5, 5));
-        jPanelRight.setBorder(BorderFactory.createEmptyBorder(5,20,5,5));
+        jPanelRight.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 5));
         jPanelRight.add(jlPassword);
         jPanelRight.add(jpfPassword);
         jPanelRight.add(jtfDBUsername);
@@ -93,16 +98,16 @@ public class Anmeldung extends JFrame implements ActionListener {
 
     // Action Methods
     @Override
-    public void actionPerformed(ActionEvent ae){
+    public void actionPerformed(ActionEvent ae) {
         Object eventTarget = ae.getSource();
-        if(ae.getSource() == jbLogin) {
+        if (ae.getSource() == jbLogin) {
             this.loginAction();
-        } else if(ae.getSource() == jbExit) {
+        } else if (ae.getSource() == jbExit) {
             this.exitAction();
         }
     }
 
-    public void loginAction(){
+    public void loginAction() {
         String name = jtfFirstname.getText();
         String lastName = jtfLastname.getText();
 //        try{
@@ -126,14 +131,26 @@ public class Anmeldung extends JFrame implements ActionListener {
 //        jtfStatus.setText("Isim: " + name + " Soyisim: " + lastName);
     }
 
-    public void exitAction(){
+    public void exitAction() {
         this.dispose();
         System.exit(0);
         System.out.println("Exit Button clicked");
     }
 
-    public static void main(String[] args) {
-        new Anmeldung("Anmeldung");
+    public void getDbManager() {
+        char[] passArray = jpfPassword.getPassword();
+        try {
+            if (dbManager == null) {
+                dbManager = new DbManager("localhost", "demo-user", passArray);
+                jtfStatus.setText("Connection created.");
+            }
+        } catch(ClassNotFoundException cnfe) {
+            System.out.println(cnfe.getMessage());
+            jtfStatus.setText(cnfe.getMessage());
+        } catch(SQLException sqle) {
+            System.out.println(sqle.getMessage());
+            jtfStatus.setText(sqle.getMessage());
+        }
     }
 
 }
