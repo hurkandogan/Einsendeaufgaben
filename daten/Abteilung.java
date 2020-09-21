@@ -8,6 +8,9 @@ import java.sql.ResultSet;
 
 public class Abteilung implements PersistenzInterface {
 
+	String message = "";
+	public String getMessage() { return message; }
+
 	/* ****** PI-Properties ****** */
 	private boolean persistent;
 	public boolean isPersistent() { return persistent; }
@@ -58,7 +61,16 @@ public class Abteilung implements PersistenzInterface {
 		return null;
 	}
 	public String getInsertSQL() {
-		// TODO Auto-generated method stub
+		String querySQL = null;
+		if(this.getId() > 0){
+			querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getId();
+		} else{
+			if (this.getAngestellter().getId() > 0) {
+				querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getAngestellter().getAbteilung();
+			} else {
+				message = "Abteilung#getInsertSQL: There is no person with this ID";
+			}
+		}
 		return null;
 	}
 	public String getRetrieveSQL() {

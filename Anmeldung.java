@@ -117,10 +117,16 @@ public class Anmeldung extends JFrame implements ActionListener {
                     angestellter = new Angestellter(person);
                     angestellter.retrieveObject(dbManager);
                     jtfStatus.setText("Name: " + angestellter.getPerson().getVorname() + " Abteilung: " + angestellter.getAbteilung());
+                    dbManager.endTransaction(true);
+                } else {
+                    jtfStatus.setText("This Person is not an Employee");
+                    dbManager.endTransaction(true);
                 }
             } else {
                 jtfStatus.setText("Mit diesen Angaben ist niemand gefunden.");
+                dbManager.endTransaction(true);
             }
+            dbManager.endTransaction(true);
         }
     }
 

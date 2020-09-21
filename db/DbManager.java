@@ -198,8 +198,7 @@ public class DbManager {
 			return true;
 		} catch (SQLException sqle) {
 			message = sqle.toString();
-			logOut.println("DbManager.startTransaction - "
-					+ sqle.toString());
+			logOut.println("DbManager.startTransaction - " + sqle.toString());
 			return false;
 		}
 	}
@@ -216,8 +215,7 @@ public class DbManager {
 			return true;
 		} catch (SQLException sqle) {
 			message = sqle.toString();
-			logOut.println("DbManager.endTransaction - "
-					+ sqle.toString());
+			logOut.println("DbManager.endTransaction - " + sqle.toString());
 			return false;
 		}
 	}
