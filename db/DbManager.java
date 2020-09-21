@@ -194,8 +194,7 @@ public class DbManager {
 	public boolean startTransaction() {
 		try {
 			connection.setAutoCommit(false);
-			connection.setTransactionIsolation(
-					Connection.TRANSACTION_SERIALIZABLE);
+			connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 			return true;
 		} catch (SQLException sqle) {
 			message = sqle.toString();

@@ -101,18 +101,23 @@ public class Anmeldung extends JFrame implements ActionListener {
     }
 
     public void loginAction() {
-        this.getDbManager();
         String name = jtfFirstname.getText();
         String lastName = jtfLastname.getText();
         if (name.equals("") && lastName.equals("")) {
             System.out.println("Name and lastname is not provided.");
             jtfStatus.setText("You should provide name and lastname");
         } else {
-            person = new Person(name, lastName);
+            this.getDbManager();
+            if (person == null) {
+                person = new Person(name, lastName);
+            }
+            dbManager.startTransaction();
             if (person.retrieveObject(dbManager)) {
-                angestellter = new Angestellter(person);
-                angestellter.retrieveObject(dbManager);
-                jtfStatus.setText("Isim: " + angestellter.getPerson().getVorname() + " Abteilung: " + angestellter.getAbteilung());
+                if (angestellter == null) {
+                    angestellter = new Angestellter(person);
+                    angestellter.retrieveObject(dbManager);
+                    jtfStatus.setText("Name: " + angestellter.getPerson().getVorname() + " Abteilung: " + angestellter.getAbteilung());
+                }
             } else {
                 jtfStatus.setText("Mit diesen Angaben ist niemand gefunden.");
             }
@@ -130,6 +135,8 @@ public class Anmeldung extends JFrame implements ActionListener {
             if (dbManager == null) {
                 dbManager = new DbManager("localhost", "demo-user", passArray);
                 jtfStatus.setText("Connection created.");
+                for (@SuppressWarnings("unused") char c : passArray)
+                    c = 0;
             }
         } catch(ClassNotFoundException cnfe) {
             System.out.println("Anmeldung#getDbManager: " + cnfe.getMessage());
