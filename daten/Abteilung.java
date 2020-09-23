@@ -5,7 +5,6 @@ import jav12Einsendeaufgaben.angestellterAnmeldung.db.PersistenzInterface;
 
 import java.sql.ResultSet;
 
-
 public class Abteilung implements PersistenzInterface {
 
 	String message = "";

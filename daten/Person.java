@@ -94,7 +94,7 @@ public class Person implements PersistenzInterface {
 	 * Eine Person kann entweder über Name und Vorname oder über die ID in der
 	 * Datenbank gefunden und sodann gelesen werden.
 	 *
-	 * @see lernhefte.jav11.lektion5.db.PersistenzInterface#retrieveObject(java.sql.Connection)
+	 * @see jav12Einsendeaufgaben.angestellterAnmeldung.db.PersistenzInterface::retrieveObject(java.sql.Connection)
 	 */
 	public boolean retrieveObject(DbManager dbManager) {
 		if(this.isPersistent()) {
