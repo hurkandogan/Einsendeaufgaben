@@ -13,6 +13,16 @@ public class Angestellter implements PersistenzInterface {
 	private String message;
 	public String getMessage() { return message; }
 
+	@Override
+	public void setMessage(String message) {
+
+	}
+
+	@Override
+	public PersistenzInterface clone() throws CloneNotSupportedException {
+		return null;
+	}
+
 	/* ****** PI-Properties ****** */
 	private boolean persistent;
 	public boolean isPersistent() { return persistent; }
@@ -21,6 +31,16 @@ public class Angestellter implements PersistenzInterface {
 	private boolean modified;
 	public boolean isModified() { return modified; }
 	public void setModified(boolean newValue) { this.modified = newValue; }
+
+	@Override
+	public void setID(int id) {
+
+	}
+
+	@Override
+	public int getID() {
+		return 0;
+	}
 
 	/* Konstruktoren */
 	public Angestellter(int id) {
@@ -53,7 +73,7 @@ public class Angestellter implements PersistenzInterface {
 			message = "ausDbLesen: Der Angestellte wurde schon aus der DB gelesen";
 			return true;
 		} else {
-			if(!dbManager.executeRetrieve(this)) { // alternative Suche nach id oder Name in
+			if(dbManager.executeRetrieve(this) != null) { // alternative Suche nach id oder Name in
 				message = "ausDbLesen: Kein Angestellter in der Datenbank";
 				return false;
 			} else {

@@ -10,6 +10,16 @@ public class Abteilung implements PersistenzInterface {
 	String message = "";
 	public String getMessage() { return message; }
 
+	@Override
+	public void setMessage(String message) {
+
+	}
+
+	@Override
+	public PersistenzInterface clone() throws CloneNotSupportedException {
+		return null;
+	}
+
 	/* ****** PI-Properties ****** */
 	private boolean persistent;
 	public boolean isPersistent() { return persistent; }
@@ -18,6 +28,16 @@ public class Abteilung implements PersistenzInterface {
 	private boolean modified;
 	public boolean isModified() { return modified; }
 	public void setModified(boolean newValue) { this.modified = newValue; }
+
+	@Override
+	public void setID(int id) {
+
+	}
+
+	@Override
+	public int getID() {
+		return 0;
+	}
 
 	/* Konstruktoren */
 	public Abteilung(int id) {

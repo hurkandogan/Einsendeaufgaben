@@ -11,6 +11,16 @@ public class Person implements PersistenzInterface {
 	private String message = "";
 	public String getMessage() { return message; }
 
+	@Override
+	public void setMessage(String message) {
+
+	}
+
+	@Override
+	public PersistenzInterface clone() throws CloneNotSupportedException {
+		return null;
+	}
+
 	/* Properties "PersistenzInterface" */
 	private boolean persistent;
 	public boolean isPersistent() { return persistent; 	}
@@ -18,6 +28,16 @@ public class Person implements PersistenzInterface {
 
 	private boolean modified;
 	public void setModified(boolean newValue) { modified = newValue; 	}
+
+	@Override
+	public void setID(int id) {
+
+	}
+
+	@Override
+	public int getID() {
+		return 0;
+	}
 
 	public boolean isModified() { return modified; 	}
 
@@ -101,7 +121,7 @@ public class Person implements PersistenzInterface {
 			message = "ausDbLesen: Die Person wurde schon aus der DB gelesen";
 			return true;
 		} else {
-			if(!dbManager.executeRetrieve(this)) { // alternative Suche nach id oder Name in
+			if(dbManager.executeRetrieve(this) != null) { // alternative Suche nach id oder Name in
 				message = "ausDbLesen: Person nicht gefunden";
 				return false;
 			} else {
@@ -116,7 +136,7 @@ public class Person implements PersistenzInterface {
 			return false;
 		} else if(id > 0){
 			/* zunächst Existenzprüfung - ebenfalls mit dem DbManager: */
-			if(dbManager.executeRetrieve(this)){
+			if(dbManager.executeRetrieve(this) != null){
 				/* es gibt diese Person bereits in der DB */
 				message = "insertObject: Person existiert bereits in DB";
 				return false;

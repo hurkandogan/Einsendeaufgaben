@@ -4,8 +4,11 @@ import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Angestellter;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Person;
 
+import javax.sound.midi.SysexMessage;
 import java.io.PrintStream;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class DbManager {
@@ -36,22 +39,22 @@ public class DbManager {
 	 * Die jeweilige DB-Operation wird von einem PI-Objekt angestoßen. Der DbManager holt
 	 * sich aus diesem piObjekt per Callback den erforderlichen SQL-String. */
 
-	public boolean executeInsert(PersistenzInterface piObject) {
+	public boolean executeInsert(PersistenzInterface piObjekt) {
 		try {
-			String insertString = piObject.getInsertSQL();
+			String insertString = piObjekt.getInsertSQL();
 			Statement stmt = connection.createStatement();
 
 			if (stmt.executeUpdate(insertString, Statement.RETURN_GENERATED_KEYS) > 0){
 				ResultSet rs = stmt.getGeneratedKeys();
 				if(rs.next()){
-					piObject.setID(rs.getInt(1));
+					piObjekt.setID(rs.getInt(1));
 				}
-				this.objektPuffern(piObject);
-				piObject.setModified(false);
-				piObject.setPersistent(true);
+				this.objektPuffern(piObjekt);
+				piObjekt.setModified(false);
+				piObjekt.setPersistent(true);
 				rs.close();
 			} else {
-				message = "Kein Objekt in DB eingefuegt (Typ: " + piObject.getClass().getName() + ")";
+				message = "Kein Objekt in DB eingefuegt (Typ: " + piObjekt.getClass().getName() + ")";
 				System.out.println(message);
 			}
 		} catch (SQLException sqle) {
@@ -62,23 +65,48 @@ public class DbManager {
 		return true;
 	}
 
-	public boolean executeRetrieve(PersistenzInterface piObjekt) {
+	public PersistenzInterface executeRetrieve(PersistenzInterface piObjekt) {
 		try {
+			if (piObjekt.getPufferKey() != null) { // Checking Puffer if there is an Object
+				PersistenzInterface piObjPuffer = piPuffer.get(piObjekt);
+				if(piObjPuffer != null){
+					if(log){
+						System.out.println("PiPuffer returns Puffer-Object (=piObject? " +
+								piObjekt.equals(piObjPuffer) + "): " +
+								piObjPuffer.toString() + ", persistent: " +
+								piObjPuffer.isPersistent() + ", modified: " +
+								piObjPuffer.isModified() + ", key: " +
+								piObjPuffer.getPufferKey());
+					}
+					return piObjPuffer;
+				} else {
+					if (log) {
+						System.out.println("DbManager: piObjekt is not yet in Puffer (" + piObjekt.toString() + " / key: " + piObjekt.getPufferKey());
+					}
+				}
+			} else {
+				message = "No PufferKey available.";
+				System.out.println(message);
+				return null;
+			}
 			String selectString = piObjekt.getRetrieveSQL();
 			Statement stmt = connection.createStatement();
-			// ausführen der Anweisung
-			if (piObjekt.loadObjProps(stmt.executeQuery(selectString))){
+			ResultSet rs = stmt.executeQuery(selectString);
+			if (piObjekt.loadObjProps(rs)){
 				piObjekt.setPersistent(true);
 				piObjekt.setModified(false);
-				return true;
+				this.objektPuffern(piObjekt);
+				rs.close();
+				return piObjekt;
 			} else {
-				message = "Kein Objekt in der Datenbank gefunden";
-				return false;
+				message = piObjekt.getMessage();
+				System.out.println(message);
+				return null;
 			}
 		} catch (SQLException sqle) {
 			message = "Lesen misslungen: " + sqle.getMessage();
 			System.out.println("DbManager.executeRetrieve - " + sqle.toString());
-			return false;
+			return null;
 		}
 	}
 
@@ -86,11 +114,21 @@ public class DbManager {
 		String updateString = piObjekt.getUpdateSQL();
 		try {
 			Statement stmt = connection.createStatement();
-			if (stmt.executeUpdate(updateString) > 0){
+			int rowCount = stmt.executeUpdate(updateString);
+			if(log){
+				System.out.println("DB-Update for " + piObjekt.getPufferKey() + ", Row Count: " + rowCount);
+			}
+			PersistenzInterface obj = piPuffer.get(piObjekt);
+			PersistenzInterface objCache = piPuffer.getDbCache(piObjekt);
+			if(log) {
+				System.out.println("Object: " + obj + ", objCache: " + objCache);
+				System.out.println("Update Object = cacheObject? " + (obj.equals(objCache)) + " / " + obj.toString() + " / " + objCache.toString());
+			}
+			if (rowCount > 0) {
 				piObjekt.setModified(false);
 				return true;
 			} else {
-				message = "Kein Objekt in der Datenbank aktualisiert";
+				message = "No Object updated.";
 				return false;
 			}
 		} catch (SQLException sqle) {
@@ -103,98 +141,113 @@ public class DbManager {
 	public boolean executeDelete(PersistenzInterface piObjekt) {
 		String deleteString = piObjekt.getDeleteSQL();
 		try {
-			connection.setAutoCommit(true);
 			Statement stmt = connection.createStatement();
 			if (stmt.executeUpdate(deleteString) > 0){
-				if(log)
-					System.out.println("\texecuteDelete: Objekt " + piObjekt.toString() + " gelöscht");
+				System.out.println("\texecuteDelete: Objekt " + piObjekt.toString() + " gelöscht");
 				piObjekt.setPersistent(false);
+				piPuffer.remove(piObjekt);
 				return true;
 			} else {
 				message += "\nKein Objekt in der DB gelöscht (Typ=" + piObjekt.getClass().getName() + ")";
+				System.out.println(message);
 				return false;
 			}
-		} catch (SQLException sqle) {
+		} catch (SQLException sqle){
 			message += "\nLöschen misslungen: " + sqle.getMessage();
 			System.out.println("DbManager.executeDelete - " + sqle.toString());
 			return false;
 		}
 	}
 
-
-	/* Die Methode wird in Lektion 6 zur Ausführung von Bestellungen ergänzt.
-	 * Wesentlich ist hier, dass die Verfügbarkeit geprüft wird und die Bestellung
-	 * eines Artikels, der nicht mehr verfügbar ist (Bestellung eines Dritten
-	 * während der Erstellung dieser Bestellung) nicht ausgeführt wird. */
-//	public boolean executeBestellung(Bestellung bestellung,
-//			List<Bestellposition> bestellListe) {
-//		boolean returnValue = true;
-//		String insertString = "INSERT INTO bestellpositionen VALUES("
-//			+ bestellung.getId() + ", ?, ?, NULL);"; 	// Parameter: artikelID, menge
-//		String updateString = "UPDATE artikel SET menge=? WHERE id=?;";	// verfügbare Menge herabsetzen
-//		String selectString = "SELECT menge FROM artikel WHERE id=?";
-//		ResultSet rsArtikel = null;
-//		StringBuffer sb = new StringBuffer();;
-//		this.startTransaction();	// Ausführung der Bestellung als Transaktion
-//		try {
-//			PreparedStatement prepStmt = null;
-//			for(int i=0; i<bestellListe.size(); i++){
-//				prepStmt = this.getConnection().prepareStatement(selectString);
-//				Artikel artikel = bestellListe.get(i).getArtikel();
-//				// 1. aktuelle Artikelmenge abrufen
-//				prepStmt.setInt(1, artikel.getId());
-//				rsArtikel = prepStmt.executeQuery();
-//				if(rsArtikel.next()) {
-//					int mengeInDb = rsArtikel.getInt(1);
-//					int mengeBest = bestellListe.get(i).getMenge();
-//					if(mengeInDb >= mengeBest) {	 // Lagermenge reicht aus
-//						if(mengeBest > 0) {
-//							// 2. Bestellposition speichern
-//							prepStmt = this.getConnection().prepareStatement(insertString);
-//							prepStmt.setInt(1, artikel.getId());
-//							prepStmt.setInt(2, mengeBest);
-//							prepStmt.executeUpdate();
-//							// 3. Artikel-Tabelle - menge herabsetzen
-//							prepStmt = this.getConnection().prepareStatement(updateString);
-//							prepStmt.setInt(1, mengeInDb - mengeBest);
-//							prepStmt.setInt(2, artikel.getId());
-//							prepStmt.executeUpdate();
-//							if(log)
-//								logOut.println("bestellt: " + bestellListe.get(i).toString());
-//						}
-//					} else {
-//						/* Wir belassen es hier bei einer einfachen Mitteilung,
-//						 * die zu allen Artikeln, deren Bestellung nicht ausgeführt werden
-//						 * konnte, dem StringBuffer-Objekt angehängt wird.
-//						 * TODO: Ausbau der Anwendung, z.B. in der Form, dass die nicht
-//						 * bestellbaren Artikel mit aktualisiertem Lagerbestand erneut angeboten werden. */
-//						sb.append("Artikel \"");
-//						sb.append(artikel.getName());
-//						sb.append("\" (");
-//						sb.append(artikel.getId());
-//						sb.append("): Die bestellte Menge=");
-//						sb.append(mengeBest);
-//						sb.append(" übersteigt die noch verfügbare Menge=");
-//						sb.append(mengeInDb);
-//						sb.append("\nDie Bestellung dieses Artikels wurde nicht ausgeführt\n\n.");
-//						returnValue = false;
-//					}
-//				}
-//			}
-//			rsArtikel.close();
-//			message = sb.toString();
-//			this.endTransaction(true);	// Transaktionsende mit "commit"
-//		} catch (SQLException sqle) {
-//			this.endTransaction(true);	// Transaktionsende mit "rollback"
-//			sb.append("DbManager.executeBestellung\n\t");
-//			sb.append(sqle.toString());
-//			sb.append("\n");
-//			message = sb.toString();
-//			logOut.println(message);
-//			returnValue = false;
-//		}
-//		return returnValue;
-//	}
+	public boolean executeUpdateAll(){
+		if(!this.startTransaction()){
+			return false;
+		}
+		Iterator<PersistenzInterface> piObjekte = piPuffer.values().iterator();
+		Statement stmt = null;
+		if(log){
+			System.out.println("DbManager#executeUpdateAll: Ojekte erhalten DB-Update");
+		}
+		int counter = 0;
+		while (piObjekte.hasNext()){
+			PersistenzInterface piObjekt = piObjekte.next();
+			if(piObjekt.isModified() && (piPuffer.getDbCache(piObjekt)) != null){
+				try{
+					String selectString = piObjekt.getRetrieveSQL();
+					stmt = connection.createStatement();
+					ResultSet rs = stmt.executeQuery(selectString);
+					PersistenzInterface piDB = null;
+					try{
+						piDB = piObjekt.getClass().newInstance();
+						piDB.loadObjProps(rs);
+						rs.close();
+					}catch(InstantiationException ie){
+						message = "DbManager#executeUpdateAll: " + piObjekt.getPufferKey() + ": Das Objekt konnte nicht instanziiert werden.";
+						System.out.println(message + " " + ie.toString());
+						this.endTransaction(false);
+					}catch(IllegalAccessException iae){
+						message = "DbManager#executeUpdateAll: " + piObjekt.getPufferKey() + ": Kein Zuggriff auf das Objekt.";
+						System.out.println(message + " " + iae.toString());
+						this.endTransaction(false);
+					}
+					if(piDB != null) {
+						boolean gleich = piDB.equals(piPuffer.getDbCache(piObjekt));
+						if (!gleich) {
+							message = piObjekt.getPufferKey() + ": Das Objekt wurde von Dritten in der Datenbank geändert.";
+							if (log) {
+								System.out.println(message + " Objekt: " + piObjekt + "/ Cache Objekt: " + piPuffer.getDbCache(piObjekt));
+							}
+							if (failedUpdateObjects == null) {
+								failedUpdateObjects = new ArrayList<PersistenzInterface>();
+							}
+							failedUpdateObjects.add(piObjekt);
+							continue;
+						} else {
+							if (log) {
+								System.out.println("Aktuelles DBobj = cacheObj? " + gleich + ", upzudatendes Objekt verändert? " + piObjekt.isModified());
+							}
+						}
+					}
+					String updateString = piObjekt.getUpdateSQL();
+					if(log){
+						System.out.println(updateString);
+					}
+					stmt = connection.createStatement();
+					int rowCount = stmt.executeUpdate(updateString);
+					if(log){
+						System.out.println("DB-Update result for " + piObjekt.getPufferKey() + ": rowCount = " + rowCount);
+					}
+					if(rowCount > 0){
+						counter++;
+						piObjekt.setModified(false);
+						piPuffer.putDbCache(piObjekt);
+					}else{
+						message = "Das Objekt " + piObjekt.getPufferKey() + " wurde nicht aktualisiert.";
+					}
+				}catch(SQLException sqle){
+					this.endTransaction(false);
+					message = "DbManager#executeUpdateAll: " + sqle.getMessage();
+					System.out.println(message);
+					return false;
+				}
+			}
+		}
+		if(log){
+			System.out.println("DbManager#executeUpdateAll: " + counter + " Objekte in DB aktualisiert.");
+		}
+		if(!this.endTransaction(true)){
+			return false;
+		} else {
+			if(failedUpdateObjects != null && failedUpdateObjects.size() > 0) {
+				System.out.println("Folgende Objekte konnten nicht upgedatet werden.");
+				Iterator<PersistenzInterface> iterator = failedUpdateObjects.iterator();
+				while(iterator.hasNext()){
+					System.out.println("\t" + iterator.next().getPufferKey());
+				}
+			}
+			return true;
+		}
+	}
 
 	/**
 	 * @param piObject
@@ -220,7 +273,7 @@ public class DbManager {
 			return true;
 		} catch (SQLException sqle) {
 			message = sqle.toString();
-			System.out.println("DbManager.startTransaction - " + sqle.toString());
+			System.out.println("DbManager#startTransaction: " + sqle.toString());
 			return false;
 		}
 	}
@@ -241,8 +294,31 @@ public class DbManager {
 			return false;
 		}
 	}
+
+	public void closeConnection(){
+		ConnectionManager.closeConnection();
+	}
+
 	public void cleanup() { 	// neu ab Lektion 5, Wiederholungsaufgaben */
 		ConnectionManager.releaseConnection(connection);
+		int size = piPuffer.size();
+		this.listPufferElemente("DbManager#cleanup: vorher:");
+		piPuffer.clear();
+		this.listPufferElemente("DbManager#cleanup: nachher:");
+		System.out.println("Elements are deleted from PiPuffer");
 		ConnectionManager.closeConnection();
+	}
+
+	public void listPufferElemente(String message){
+		if(piPuffer.isEmpty()){
+			System.out.println("PiPuffer is alread empty!");
+		}else{
+			System.out.println(message + " List of PiPuffer Elements: ");
+			Iterator<PersistenzInterface> iterator = piPuffer.values().iterator();
+			while(iterator.hasNext()){
+				PersistenzInterface piObjekt = iterator.next();
+				System.out.println("\n" + piObjekt.toString());
+			}
+		}
 	}
 }
