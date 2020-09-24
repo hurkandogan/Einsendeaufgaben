@@ -15,8 +15,8 @@ public class PiPuffer {
 	private HashMap<String, HashMap<String, PersistenzInterface>> piPuffer;
 
 	/* Die Puffer für die PI-Objekte in den HashMaps der Objektmengen, sortiert
-	 * nach dem Typ der PersistenzInterface-Implementierung.  */
-	private HashMap<String,PersistenzInterface> piImplPuffer;
+	 * nach dem Typ der PersistenzInterface-Implementierung. */
+	private HashMap<String, PersistenzInterface> piImplPuffer;
 
 	public PiPuffer() {
 		piPuffer = new HashMap<String, HashMap<String,PersistenzInterface>>();
@@ -40,7 +40,6 @@ public class PiPuffer {
 			return null;
 		}
 	}
-
 	public PersistenzInterface put(PersistenzInterface piObjekt) {
 		piImplPuffer = piPuffer.get(piObjekt.getClass().getName());
 		if (piImplPuffer == null){
@@ -58,9 +57,7 @@ public class PiPuffer {
 		}
 		return piImplPuffer.put(this.getCacheKey(piObjekt), piObjekt);
 	}
-	public String getCacheKey(PersistenzInterface piObjekt) {
-		return "cache_" + piObjekt.getPufferKey();
-	}
+
 	/* entfernt zunächst das aus der Datenbank gecachte Objekt und dann das gelöschte */
 	public PersistenzInterface remove(PersistenzInterface piObjekt) {
 		piImplPuffer = piPuffer.get(piObjekt.getClass().getName());
@@ -79,8 +76,7 @@ public class PiPuffer {
 	}
 	/* ******* Weitere Methoden zum Handling des PiPuffers *******  */
 	public void clear() {
-		Iterator<HashMap<String,PersistenzInterface>> piImplPufferIterator
-			= piPuffer.values().iterator();
+		Iterator<HashMap<String,PersistenzInterface>> piImplPufferIterator = piPuffer.values().iterator();
 		while (piImplPufferIterator.hasNext()) {
 			piImplPuffer = piImplPufferIterator.next();
 			piImplPuffer.clear();	// HashMap clear-Methode
@@ -102,12 +98,10 @@ public class PiPuffer {
 	 * in der piPuffer-HashMap gesammelt werden). */
 	public List<PersistenzInterface> values() {
 		List<PersistenzInterface> piObjekte = new ArrayList<PersistenzInterface>();
-		Iterator<HashMap<String,PersistenzInterface>> piImplPufferIterator
-				= piPuffer.values().iterator();
+		Iterator<HashMap<String,PersistenzInterface>> piImplPufferIterator = piPuffer.values().iterator();
 		while (piImplPufferIterator.hasNext()){
 			piImplPuffer = piImplPufferIterator.next();
-			Iterator<PersistenzInterface> piObjIterator
-					= piImplPuffer.values().iterator();
+			Iterator<PersistenzInterface> piObjIterator = piImplPuffer.values().iterator();
 			while (piObjIterator.hasNext()){
 				piObjekte.add(piObjIterator.next());
 			}
@@ -130,5 +124,8 @@ public class PiPuffer {
 			result += piImplPufferEnum.next().size();
 		}
 		return result;
+	}
+	public String getCacheKey(PersistenzInterface piObjekt) {
+		return "cache_" + piObjekt.getPufferKey();
 	}
 }

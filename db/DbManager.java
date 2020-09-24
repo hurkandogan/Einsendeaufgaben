@@ -4,7 +4,6 @@ import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Angestellter;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Person;
 
-import javax.sound.midi.SysexMessage;
 import java.io.PrintStream;
 import java.sql.*;
 import java.util.ArrayList;
