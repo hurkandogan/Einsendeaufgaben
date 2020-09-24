@@ -17,26 +17,50 @@ public class DbManager {
 	private String message = "";
 	public String getMessage() { return message; }
 
+	private PiPuffer piPuffer;
+
 	private List<PersistenzInterface> failedUpdateObjects;
 	public List<PersistenzInterface> getFailedUpdateObjects() { return failedUpdateObjects; }
 
 	private boolean log = true;
 	public void setLog(boolean log) { this.log = log; }
-	private PrintStream logOut = System.out;
-	public void setLogOut(PrintStream printStrean) { this.logOut = printStrean; }
 
 	/*  ******** Konstruktoren   ******** */
 	public DbManager() {}
 
-	public DbManager(String host, String user, char[] pwCharArray)
-	throws ClassNotFoundException, SQLException {
-		connection = ConnectionManager.getConnection(host,
-				user, new String(pwCharArray));
+	public DbManager(String host, String user, char[] pwCharArray) throws ClassNotFoundException, SQLException {
+		connection = ConnectionManager.getConnection(host, user, new String(pwCharArray));
 	}
 
 	/* ******* CRUD-Datenbank-Operationen *******
 	 * Die jeweilige DB-Operation wird von einem PI-Objekt angestoßen. Der DbManager holt
 	 * sich aus diesem piObjekt per Callback den erforderlichen SQL-String. */
+
+	public boolean executeInsert(PersistenzInterface piObject) {
+		try {
+			String insertString = piObject.getInsertSQL();
+			Statement stmt = connection.createStatement();
+
+			if (stmt.executeUpdate(insertString, Statement.RETURN_GENERATED_KEYS) > 0){
+				ResultSet rs = stmt.getGeneratedKeys();
+				if(rs.next()){
+					piObject.setID(rs.getInt(1));
+				}
+				this.objektPuffern(piObject);
+				piObject.setModified(false);
+				piObject.setPersistent(true);
+				rs.close();
+			} else {
+				message = "Kein Objekt in DB eingefuegt (Typ: " + piObject.getClass().getName() + ")";
+				System.out.println(message);
+			}
+		} catch (SQLException sqle) {
+			message = "DbManager.executeInsert: Einfügen misslungen. SQLException-Message:\n\t" + sqle.getMessage();
+			System.out.println(message);
+			return false;
+		}
+		return true;
+	}
 
 	public boolean executeRetrieve(PersistenzInterface piObjekt) {
 		try {
@@ -53,7 +77,7 @@ public class DbManager {
 			}
 		} catch (SQLException sqle) {
 			message = "Lesen misslungen: " + sqle.getMessage();
-			logOut.println("DbManager.executeRetrieve - " + sqle.toString());
+			System.out.println("DbManager.executeRetrieve - " + sqle.toString());
 			return false;
 		}
 	}
@@ -71,7 +95,7 @@ public class DbManager {
 			}
 		} catch (SQLException sqle) {
 			message = "Aktualisieren misslungen: " + sqle.getMessage();
-			logOut.println("DbManager.executeUpdate - " + sqle.toString());
+			System.out.println("DbManager.executeUpdate - " + sqle.toString());
 			return false;
 		}
 	}
@@ -83,7 +107,7 @@ public class DbManager {
 			Statement stmt = connection.createStatement();
 			if (stmt.executeUpdate(deleteString) > 0){
 				if(log)
-					logOut.println("\texecuteDelete: Objekt " + piObjekt.toString() + " gelöscht");
+					System.out.println("\texecuteDelete: Objekt " + piObjekt.toString() + " gelöscht");
 				piObjekt.setPersistent(false);
 				return true;
 			} else {
@@ -92,30 +116,12 @@ public class DbManager {
 			}
 		} catch (SQLException sqle) {
 			message += "\nLöschen misslungen: " + sqle.getMessage();
-			logOut.println("DbManager.executeDelete - " + sqle.toString());
+			System.out.println("DbManager.executeDelete - " + sqle.toString());
 			return false;
 		}
 	}
 
-	public boolean executeInsert(PersistenzInterface piObjekt) {
-		try {
-			connection.setAutoCommit(true);
-			String insertString = piObjekt.getInsertSQL();
-			Statement stmt = connection.createStatement();
-			if (stmt.executeUpdate(insertString) > 0){
-				piObjekt.setModified(false);
-				piObjekt.setPersistent(true);
-				return true;
-			} else {
-				message = "Kein Objekt in DB eingefuegt (Typ: " + piObjekt.getClass().getName() + ")";
-				return false;
-			}
-		} catch (SQLException sqle) {
-			message = "DbManager.executeInsert: Einfügen misslungen. SQLException-Message:\n\t" + sqle.getMessage();
-			logOut.println(message);
-			return false;
-		}
-	}
+
 	/* Die Methode wird in Lektion 6 zur Ausführung von Bestellungen ergänzt.
 	 * Wesentlich ist hier, dass die Verfügbarkeit geprüft wird und die Bestellung
 	 * eines Artikels, der nicht mehr verfügbar ist (Bestellung eines Dritten
@@ -190,6 +196,22 @@ public class DbManager {
 //		return returnValue;
 //	}
 
+	/**
+	 * @param piObject
+	 * @return void
+	 */
+
+	public void objektPuffern(PersistenzInterface piObject) {
+		piPuffer.put(piObject);
+		PersistenzInterface piClone = null;
+		try {
+			piClone = piObject.clone();
+		} catch(CloneNotSupportedException cnse) {
+			System.out.println("DbManager#ObjektPuffern: " + cnse.getMessage());
+		}
+		piPuffer.putDbCache(piClone);
+	}
+
 	/* *** Transaktionsmethoden *** */
 	public boolean startTransaction() {
 		try {
@@ -198,7 +220,7 @@ public class DbManager {
 			return true;
 		} catch (SQLException sqle) {
 			message = sqle.toString();
-			logOut.println("DbManager.startTransaction - " + sqle.toString());
+			System.out.println("DbManager.startTransaction - " + sqle.toString());
 			return false;
 		}
 	}
@@ -215,7 +237,7 @@ public class DbManager {
 			return true;
 		} catch (SQLException sqle) {
 			message = sqle.toString();
-			logOut.println("DbManager.endTransaction - " + sqle.toString());
+			System.out.println("DbManager.endTransaction - " + sqle.toString());
 			return false;
 		}
 	}

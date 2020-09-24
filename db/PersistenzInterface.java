@@ -25,6 +25,9 @@ public interface PersistenzInterface extends Cloneable {
 	boolean isModified();
 	void    setModified( boolean newValue );
 
+	void setID(int id);
+	int getID();
+
 	/* Fügt das aktuelle Objekt in die Datenbank ein (SQL-INSERT). */
 	boolean insertObject(DbManager dbManager);
 
@@ -56,4 +59,6 @@ public interface PersistenzInterface extends Cloneable {
 	 * Konstruktoren (bzw. deren Parameter) abgestimmt werden.  */
 	String getPufferKey();
 	void setPufferKey(String pufferKey);
+
+	PersistenzInterface clone() throws CloneNotSupportedException;
 }
