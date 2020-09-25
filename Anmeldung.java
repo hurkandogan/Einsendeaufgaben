@@ -21,7 +21,6 @@ public class Anmeldung extends JFrame implements ActionListener {
     private JPasswordField jpfPassword;
     private JButton jbLogin, jbExit;
 
-    // DB Fields
     private static String defaultDBUser = "demo-user";
     private DbManager dbManager;
 
@@ -29,13 +28,18 @@ public class Anmeldung extends JFrame implements ActionListener {
     private Angestellter angestellter;
     private Abteilung abteilung;
 
+    private String firstName, lastName;
+    public String getFirstName(){ return firstName; }
+    public void setFirstName(String value){ firstName = value; }
+    public String getLastName(){ return lastName; }
+    public void setLastName(String value){ lastName = value; }
+
     // Constructor
     public Anmeldung(String title) {
-        super(title);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.createGUI();
         this.setSize(600, 300);
-        this.setLocation(50, 50);
+        this.setLocation(100, 100);
         this.setVisible(true);
         jtfFirstname.requestFocus();
     }
@@ -101,32 +105,43 @@ public class Anmeldung extends JFrame implements ActionListener {
     }
 
     public void loginAction() {
-        String name = jtfFirstname.getText();
-        String lastName = jtfLastname.getText();
-        if (name.equals("") && lastName.equals("")) {
-            System.out.println("Name and lastname is not provided.");
+        String name = jtfFirstname.getText().trim();
+        String lastName = jtfLastname.getText().trim();
+        if (name.equals("") || lastName.equals("")) {
+            System.out.println("Name or lastname is not provided.");
             jtfStatus.setText("You should provide name and lastname");
         } else {
             this.getDbManager();
-            if (person == null) {
+            if (person == null || !person.getVorname().equals(name) || !person.getNachname().equals(lastName)) {
                 person = new Person(name, lastName);
             }
             dbManager.startTransaction();
-            if (person.retrieveObject(dbManager) != null) {
-                if (angestellter == null) {
+            jtfStatus.setText(dbManager.getMessage());
+            // Is this person in DB?
+            if ((person = (Person) person.retrieveObject(dbManager)) != null) {
+                // Is this person Angestellter?
+                if (angestellter == null || angestellter.getPerson().getID() != person.getID()) {
                     angestellter = new Angestellter(person);
-                    angestellter.retrieveObject(dbManager);
-                    jtfStatus.setText("Name: " + angestellter.getPerson().getVorname() + " Abteilung: " + angestellter.getAbteilung());
-                    dbManager.endTransaction(true);
-                } else {
-                    jtfStatus.setText("This Person is not an Employee");
-                    dbManager.endTransaction(true);
+                    if((angestellter = (Angestellter) angestellter.retrieveObject(dbManager)) != null){
+                        // Is this Angestellter Abteilungsleiter?
+                        if(abteilung == null || abteilung.getAngestellter().getID() != angestellter.getID()){
+                            abteilung = new Abteilung(angestellter);
+                            if((abteilung = (Abteilung) abteilung.retrieveObject(dbManager)) != null){
+                                jtfStatus.setText("Zugang Erfolgreich!");
+                                dbManager.endTransaction(true);
+                            } else{
+                                jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Abteilungsleiter");
+                            }
+                        }
+                    }else{
+                        jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Angestellter");
+                        dbManager.endTransaction(true);
+                    }
                 }
             } else {
-                jtfStatus.setText("Mit diesen Angaben ist niemand gefunden.");
+                jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Employee");
                 dbManager.endTransaction(true);
             }
-            dbManager.endTransaction(true);
         }
     }
 
@@ -139,7 +154,10 @@ public class Anmeldung extends JFrame implements ActionListener {
         char[] passArray = jpfPassword.getPassword();
         try {
             if (dbManager == null) {
-                dbManager = new DbManager("localhost", "demo-user", passArray);
+                jtfStatus.setText("Connection will be created");
+                System.out.println("Connection will be created");
+                dbManager = new DbManager("localhost", defaultDBUser, passArray);
+                System.out.println("Connection created.");
                 jtfStatus.setText("Connection created.");
                 for (@SuppressWarnings("unused") char c : passArray)
                     c = 0;
