@@ -32,6 +32,7 @@ public class DbManager {
 
 	public DbManager(String host, String user, char[] pwCharArray) throws ClassNotFoundException, SQLException {
 		connection = ConnectionManager.getConnection(host, user, new String(pwCharArray));
+		piPuffer = new PiPuffer();
 	}
 
 	/* ******* CRUD-Datenbank-Operationen *******
