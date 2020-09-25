@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Angestellter;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Person;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung;
+import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Angestelltendaten;
 
 public class Anmeldung extends JFrame implements ActionListener {
 
@@ -130,6 +131,7 @@ public class Anmeldung extends JFrame implements ActionListener {
                         }
                             if((abteilung = (Abteilung) abteilung.retrieveObject(dbManager)) != null){
                                 jtfStatus.setText("Zugang Erfolgreich!");
+                                new Angestelltendaten(this, dbManager);
                                 dbManager.endTransaction(true);
                             } else{
                                 jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Abteilungsleiter");

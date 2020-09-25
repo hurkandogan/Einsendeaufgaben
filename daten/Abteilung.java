@@ -29,6 +29,8 @@ public class Abteilung implements PersistenzInterface {
 		this.id = id;
 	}
 
+	public Abteilung(String test){}
+
 	public Abteilung(Angestellter angestellter){
 		this.leiter = angestellter;
 		this.setModified(false);
