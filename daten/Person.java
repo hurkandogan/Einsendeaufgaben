@@ -112,6 +112,7 @@ public class Person implements PersistenzInterface {
 	 *
 	 * @see jav12Einsendeaufgaben.angestellterAnmeldung.db.PersistenzInterface::retrieveObject(java.sql.Connection)
 	 */
+	@Override
 	public PersistenzInterface retrieveObject(DbManager dbManager) {
 		PersistenzInterface piObj = null;
 		if(this.isPersistent()) {
@@ -197,6 +198,7 @@ public class Person implements PersistenzInterface {
 			queryString += "' AND nachname='" + this.getNachname() + "'";
 		} else {
 			message = "Person#getRetrieveSQL: Vor- und Nachname müssen gesetzt sein";
+			System.out.println(message);
 		}
 		return queryString;
 	}
