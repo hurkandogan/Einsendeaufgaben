@@ -1,7 +1,6 @@
 package jav12Einsendeaufgaben.angestellterAnmeldung.db;
 
 import java.sql.ResultSet;
-import jav12Einsendeaufgaben.angestellterAnmeldung.db.DbManager;
 
 /* Das Interface muss auch in dieses Projekt aufgenommen werden,
  * da es den DbManager dieser Projektversion verwendet. Daher ist kein
@@ -30,17 +29,14 @@ public interface PersistenzInterface extends Cloneable {
 
 	/* Fügt das aktuelle Objekt in die Datenbank ein (SQL-INSERT). */
 	boolean insertObject(DbManager dbManager);
-
 	/* Löscht das aktuelle Objekt aus der Datenbank (SQL-DELETE). */
 	boolean deleteObject(DbManager dbManager);
-
 	/* Ändert den Objektzustand in der Datenbank (SQL-UPDATE).  */
 	boolean updateObject(DbManager dbManager);
-
 	/* Sucht und liest ein Objekt aus der Datenbank (SQL-SELECT).  */
 	boolean retrieveObject(DbManager dbManager);
 
-	/* SQL-String- und Verwaltungsmethoden - ab Lektion 4 */
+	/* SQL-String Methods */
 	String getDeleteSQL();
 	String getInsertSQL();
 	String getRetrieveSQL();
@@ -49,14 +45,16 @@ public interface PersistenzInterface extends Cloneable {
 	/*
 	 * Läd die Properties (Eigenschaften) eines persistenzfähigen Objekts aus
 	 * dem übergebenen ResaultSet-Objekt - Ergebnis einer Datenbankabfrage.
-	 * Der Methodenname kürzt "loadObjectProperties" ab. */
+	 * Der Methodenname kürzt "loadObjectProperties" ab.
+	 * */
 	boolean loadObjProps(ResultSet rs);
 
 	/* Ergänzung in Lektion 5:
 	 * Das mapping dient der S u c h e ("find" - bzw. "retrieve" aus CRUD)
 	 * im Puffer - also muss ein Wert erzeugt werden, mit dem typischerweise
 	 * gesucht wird. Die Schlüsseldefinition sollte auf die angebotenen
-	 * Konstruktoren (bzw. deren Parameter) abgestimmt werden.  */
+	 * Konstruktoren (bzw. deren Parameter) abgestimmt werden.
+	 * */
 	String getPufferKey();
 	void setPufferKey(String pufferKey);
 

@@ -20,6 +20,7 @@ public final class ConnectionManager extends Object {
 	public static boolean log = false;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+	/* Empty Constructor */
 	private ConnectionManager() {}
 
 	/**
@@ -32,16 +33,13 @@ public final class ConnectionManager extends Object {
 	 * @throws ClassNotFoundException wenn die JDBC-Treiberklasse nicht gefunden werdenkonnte
 	 * @throws SQLException bei Fehlern beim Aufbau der Connection
 	 */
-	public static synchronized Connection getConnection(
-			String host, String user, String passwort)
-	throws ClassNotFoundException, SQLException {
+	public static synchronized Connection getConnection(String host, String user, String passwort) throws ClassNotFoundException, SQLException {
 		Connection connection = null;
 		if (poolConnection == null) {
 			// keine Connection verfügbar
 			Class.forName(ConnectionManager.mysqlJdbcDriverClass );
-			String mysqlJdbcConnectionUrl =mysqlJdbcConnectionProtocol + host + database;
-			connection = DriverManager
-				.getConnection(mysqlJdbcConnectionUrl, user, passwort);
+			String mysqlJdbcConnectionUrl = mysqlJdbcConnectionProtocol + host + database + "?zeroDateTimeBehavior=convertNull";
+			connection = DriverManager.getConnection(mysqlJdbcConnectionUrl, user, passwort);
 			if(log)
 				System.out.println("Neue Connection für \"" + user + "\" erzeugt " + sdf.format(new Date()));
 		} else {
@@ -53,7 +51,6 @@ public final class ConnectionManager extends Object {
 		}
 		return connection;
 	}
-
 	/**
 	 * Gibt eine genutzte Connection an den Pool (mit einer Connection) zurück.
 	 * @param connection Zuvor genutztes Connection-Objekt, das zurückgegeben
@@ -63,22 +60,23 @@ public final class ConnectionManager extends Object {
 		if (poolConnection == null){
 			// keine Connection verfügbar, die aktuelle wird verfügbar gemacht
 			poolConnection = connection;
-			if(log)
+			if(log) {
 				System.out.println("Connection zurückgegeben " + sdf.format(new Date()));
+			}
 		} else {
 			// eine Connection ist verfügbar, die aktuelle wird geschlossen
 			if (connection != null){
 				try {
 					connection.close();
-					if(log)
+					if(log) {
 						System.out.println("Connection geschlossen " + sdf.format(new Date()));
+					}
 				} catch (SQLException sqle) {
 					System.out.println("ConnectionManager.releaseConnection: " + sqle.getMessage());
 				}
 			}
 		}
 	}
-
 	/**
 	 * Schließt die verfügbare Connection im ConnectionPool.
 	 */
@@ -86,26 +84,11 @@ public final class ConnectionManager extends Object {
 		if(poolConnection != null)
 			try {
 				poolConnection.close();
-				if(log)
+				if(log) {
 					System.out.println("PoolConnection geschlossen " + sdf.format(new Date()));
+				}
 			} catch (SQLException sqle) {
 				System.out.println("ConnectionManager.closeConnection: " + sqle.getMessage());
 			}
 	}
-
-	//Wiederholungsaufgabe 1
-//	public static void main(String[] args){
-//		ConnectionManager.log = true;
-//		String host = (args.length == 1) ? args[0] : "localhost";
-//		try{
-//			Connection conn = getConnection(host, "demo-user", "");
-//			ConnectionManager.releaseConnection(conn);
-//			conn = getConnection(host, "demo-user", "");
-//			ConnectionManager.releaseConnection(conn);
-//			ConnectionManager.closeConnection();
-//		}catch(Exception e){
-//			System.out.println("Fehler beim Erzeugen der Connection: " + e.getMessage());
-//			System.exit(-1);
-//		}
-//	}
 }
