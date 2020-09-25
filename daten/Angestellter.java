@@ -95,7 +95,7 @@ public class Angestellter implements PersistenzInterface {
 			message = "Angestellter#retrieveObject: Der Angestellte wurde schon aus der DB gelesen";
 			return this;
 		} else {
-			if((piObj = dbManager.executeRetrieve(this)) != null) { // alternative Suche nach id oder Name in
+			if((piObj = dbManager.executeRetrieve(this)) == null) { // alternative Suche nach id oder Name in
 				message = "Angestellter#retrieveObject: Kein Angestellter in der Datenbank";
 				return null;
 			} else {
