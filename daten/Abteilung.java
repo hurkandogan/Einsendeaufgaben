@@ -90,7 +90,7 @@ public class Abteilung implements PersistenzInterface {
 		if(this.getID() > 0){
 			querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getID();
 		} else{
-			if (this.getAngestellter().getId() > 0) {
+			if (this.getAngestellter().getID() > 0) {
 				querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getAngestellter().getAbteilung();
 			} else {
 				message = "Abteilung#getInsertSQL: There is no person with this ID";
@@ -103,8 +103,8 @@ public class Abteilung implements PersistenzInterface {
 		if(this.getID() > 0){
 			queryString = "SELECT id, name, leiterID FROM abteilungen WHERE id = " + this.getID();
 		}else{
-			if(this.getAngestellter().getId() > 0) {
-				queryString = "SELECT id, name, leiterID FROM abteilungen WHERE leiterID = " + this.getAngestellter().getId();
+			if(this.getAngestellter().getID() > 0) {
+				queryString = "SELECT id, name, leiterID FROM abteilungen WHERE leiterID = " + this.getAngestellter().getID();
 			}else{
 				message = "Abteilungen#getRetrieveSQL: personID should be given!";
 				if(log) {
@@ -148,7 +148,7 @@ public class Abteilung implements PersistenzInterface {
 			Abteilung param = (Abteilung) object;
 			if(param.getID() != this.id){
 				return false;
-			} else if (param.getAngestellter().getId() != this.leiter.getId()){
+			} else if (param.getAngestellter().getID() != this.leiter.getID()){
 				return false;
 			}
 			return true;

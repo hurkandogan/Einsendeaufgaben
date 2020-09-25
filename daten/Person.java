@@ -8,18 +8,9 @@ import java.sql.SQLException;
 
 public class Person implements PersistenzInterface {
 
+	// Message fields
 	private String message = "";
 	public String getMessage() { return message; }
-
-	@Override
-	public void setMessage(String message) {
-
-	}
-
-	@Override
-	public PersistenzInterface clone() throws CloneNotSupportedException {
-		return null;
-	}
 
 	/* Properties "PersistenzInterface" */
 	private boolean persistent;
@@ -27,24 +18,21 @@ public class Person implements PersistenzInterface {
 	public void setPersistent(boolean newValue) { persistent = newValue; }
 
 	private boolean modified;
-	public void setModified(boolean newValue) { modified = newValue; 	}
+	public boolean isModified() { return modified; }
+	public void setModified(boolean newValue) { modified = newValue; }
 
-	@Override
-	public void setID(int id) {
-
+	private String pufferKey;
+	public String getPufferKey(){ return pufferKey; }
+	public void setPufferKey(String pufferKey){
+		if(this.pufferKey == null){
+			this.pufferKey = pufferKey;
+		}
 	}
 
-	@Override
-	public int getID() {
-		return 0;
-	}
-
-	public boolean isModified() { return modified; 	}
-
-	/* Properties Personendaten */
+	/* Properties Person Data */
 	private int id;
-	public int getId() { return id; }
-	public void setId(int id) { this.id = id;  this.setModified(true); }
+	public int getID() { return id; }
+	public void setID(int id) { this.id = id;  this.setModified(true); }
 
 	private String vorname;
 	public String getVorname() { return vorname; }
@@ -83,17 +71,23 @@ public class Person implements PersistenzInterface {
 	public String getTelefon() { return telefon; }
 	public void setTelefon(String telefon) { this.telefon = telefon;  this.setModified(true); }
 
+	private String landSQL;
+	private String telefonSQL;
+
 	/* Konstruktoren */
 
 	public Person() {}
 	public Person(int id) {
 		this.id = id;
+		this.setPufferKey(new Integer(id).toString());
 	}
 
 	public Person(String vorname, String nachname) {
 		this.vorname = vorname;
 		this.nachname = nachname;
 		this.setModified(false);
+		this.setPersistent(false);
+		this.setPufferKey(vorname + " " + nachname);
 	}
 	public Person(String vorname, String nachname,
 			String strasse, String hausnummer, String ort,
@@ -107,6 +101,8 @@ public class Person implements PersistenzInterface {
 		this.setPlz(plz);
 		this.setTelefon(telefon);
 		this.setModified(false);
+		this.setPersistent(false);
+		this.setPufferKey(vorname + " " + nachname);
 	}
 
 	/* DB-Operationen - PersistenzInterface-Methoden */
@@ -116,117 +112,123 @@ public class Person implements PersistenzInterface {
 	 *
 	 * @see jav12Einsendeaufgaben.angestellterAnmeldung.db.PersistenzInterface::retrieveObject(java.sql.Connection)
 	 */
-	public boolean retrieveObject(DbManager dbManager) {
+	public PersistenzInterface retrieveObject(DbManager dbManager) {
+		PersistenzInterface piObj = null;
 		if(this.isPersistent()) {
-			message = "ausDbLesen: Die Person wurde schon aus der DB gelesen";
-			return true;
+			message = "Person#retrieveObject: Die Person wurde schon aus der DB gelesen";
+			return this;
 		} else {
-			if(dbManager.executeRetrieve(this) != null) { // alternative Suche nach id oder Name in
-				message = "ausDbLesen: Person nicht gefunden";
-				return false;
+			if((piObj = dbManager.executeRetrieve(this)) == null) { // alternative Suche nach id oder Name in
+				message = "Person#retrieveObject: Person nicht gefunden";
+				return null;
 			} else {
-				return true;
+				return piObj;
 			}
 		}
 	}
 
 	public boolean insertObject(DbManager dbManager) {
 		if(this.isPersistent()) {
-			message = "insertObject: Nichts zu tun - Person ist gespeichert (persistent)";
+			message = "Person#insertObject: Nichts zu tun - Person ist gespeichert (persistent)";
 			return false;
 		} else if(id > 0){
 			/* zunächst Existenzprüfung - ebenfalls mit dem DbManager: */
-			if(dbManager.executeRetrieve(this) != null){
+			if(dbManager.executeRetrieve(this) == null){
 				/* es gibt diese Person bereits in der DB */
-				message = "insertObject: Person existiert bereits in DB";
+				message = "Person#insertObject: Person existiert bereits in DB";
 				return false;
 			}
 		}
 		if(dbManager.executeInsert(this))
 			return true;
 		else {
-			message = "insertObject: Fehler beim Einfügen der Person (id=" + id + ")";
+			message = "Person#insertObject: Fehler beim Einfügen der Person (id=" + id + ")";
 			return false;
 		}
 	}
+
 	public boolean updateObject(DbManager dbManager) {
 		/* nur persistente und veränderte Objekte müssen aktualisiert werden */
 		if(this.isPersistent() && this.isModified()) {
-			if(this.checkField(vorname) && this.checkField(nachname)) {
 				if(dbManager.executeUpdate(this)) {
-					message = "Personen-Update erfolgreich";
+					message = "Person#updateObject: Personen-Update erfolgreich";
 					return true;
 				} else {
-					message = "Person.inDbAendern: Fehler beim Aktualisieren der Personendaten in DB";
+					message = "Person#updateObject: Fehler beim Aktualisieren der Personendaten in DB";
 					System.out.println(message);
 					return false;
 				}
-			} else
-				message = "Vor- und Nachname müssen gesetzt sein!";
-		}
-		message = "inDbAendern: nichts zu tun - Person entweder transient oder unverändert";
+			}
+		message = "Person#updateObject: nichts zu tun - Person entweder transient oder unverändert";
 		return false;
 	}
+
 	public boolean deleteObject(DbManager dbManager) {
 		if(this.isPersistent()) {
-			if(dbManager.executeDelete(this))
+			if(dbManager.executeDelete(this)) {
 				return true;
-			else {
-				message = "ausDbEntfernen: Fehler beim Versuch, die Person zu löschen";
+			} else {
+				message = "Person#deleteObject: Fehler beim Versuch, die Person zu löschen";
 				return false;
 			}
-		} else
-			message = "ausDbEntfernen: Person ist transient, kann daher nicht in der DB gelöscht werden";
+		} else {
+			message = "Person#deleteObject: Person ist transient, kann daher nicht in der DB gelöscht werden";
+		}
 		return false;
 	}
 
 	/* SQL-String-Methoden von "PersistenzInterface" - ab Lektion 4 */
 	public String getInsertSQL() {
-		/* "land" und "telefon" können null sein. Dann muss auch "null" gesetzt
-		 * werden - ohne Einkleidung durch einfache Anführungszeichen!  */
-		String sqlLand = (land == null)? null : "'" + land + "'";
-		String sqlTelefon = (telefon == null)? null : "'" + telefon + "'";
+		this.prepareOptionalAttributes();
 		String insertString = "INSERT INTO personen VALUES(NULL, '"
 			+ this.getVorname() + "', '" + this.getNachname() + "', '"
 			+ this.getStrasse() + "', '" + this.getHausnummer() + "', '"
-			+ this.getOrt() + "', " + sqlLand + ", '"
-			+ this.getPlz() + "', " + sqlTelefon + ")";
+			+ this.getOrt() + "', " + landSQL + ", '"
+			+ this.getPlz() + "', " + telefonSQL + ")";
 		return insertString;
 	}
+
 	public String getRetrieveSQL() {
 		String queryString = null;
-		if(this.getId() > 0) { 	// noch nicht gelesen, aber schon in DB (id ist dann > 0)
-			queryString = "SELECT * FROM personen WHERE id=" + this.getId();
+		if(this.getID() > 0) { 	// noch nicht gelesen, aber schon in DB (id ist dann > 0)
+			queryString = "SELECT * FROM personen WHERE id=" + this.getID();
 		} else if(this.checkField(vorname) && this.checkField(nachname)) {
 			queryString = "SELECT * FROM personen WHERE vorname='" + this.getVorname();
 			queryString += "' AND nachname='" + this.getNachname() + "'";
-		} else
-			message = "ausDbLesen: Vor- und Nachname müssen gesetzt sein";
+		} else {
+			message = "Person#getRetrieveSQL: Vor- und Nachname müssen gesetzt sein";
+		}
 		return queryString;
 	}
+
 	public String getUpdateSQL() {
 		// Auch Namensänderungen werden zugelassen!
-		String sqlLand = (land == null)? null : "'" + land + "'";
-		String sqlTelefon = (telefon == null)? null : "'" + telefon + "'";
+		this.prepareOptionalAttributes();
 		String updateString = "UPDATE personen SET vorname='" + this.getVorname()
 			+ "', nachname='" + this.getNachname()
 			+ "', strasse='" + this.getStrasse()
 			+ "', hausnummer='" + this.getHausnummer()
 			+ "', ort='" + this.getOrt()
-			+ "', land=" + sqlLand
+			+ "', land=" + landSQL
 			+ ", plz='" + this.getPlz()
-			+ "', telefon=" + sqlTelefon
-			+ " WHERE id=" + this.getId();
+			+ "', telefon=" + telefonSQL
+			+ " WHERE id=" + this.getID();
 		return updateString;
 	}
 	public String getDeleteSQL() {
-		String updateString = "DELETE FROM personen WHERE id=" + this.getId();
+		String updateString = "DELETE FROM personen WHERE id=" + this.getID();
 		return updateString;
 	}
+
+	private void prepareOptionalAttributes() {
+		landSQL = (this.getLand() == null || this.getLand().equals("")) ? "NULL" : "'" + this.getLand().substring(0, 1).trim() + "'";
+		telefonSQL = (this.getTelefon() == null || this.getTelefon().equals("")) ? "NULL" : "'" + this.getTelefon() + "'";
+	}
+
 	public boolean loadObjProps(ResultSet rs) {
 		try {
 			if(rs != null && rs.next()) {
-				this.setId(rs.getInt(1));
+				this.setID(rs.getInt(1));
 				this.setVorname(rs.getString(2));
 				this.setNachname(rs.getString(3));
 				this.setStrasse(rs.getString(4));
@@ -235,6 +237,7 @@ public class Person implements PersistenzInterface {
 				this.setLand(rs.getString(7));
 				this.setPlz(rs.getString(8));
 				this.setTelefon(rs.getString(9));
+				message = "Person#loadObjProps: Personendaten aus ResultSet gelesen";
 				return true;
 			}
 		} catch (SQLException sqle) {
@@ -244,13 +247,14 @@ public class Person implements PersistenzInterface {
 	}
 
 	@Override
-	public String getPufferKey() {
-		return null;
-	}
-
-	@Override
-	public void setPufferKey(String pufferKey) {
-
+	public PersistenzInterface clone() throws CloneNotSupportedException {
+		Person person = (Person) super.clone();
+		if(this.id == 0 || this.vorname == null || this.nachname == null
+		|| strasse == null || hausnummer == null || ort == null || plz == null){
+			return null;
+		}
+		person.setModified(false);
+		return person;
 	}
 
 	/* Hilfsmethoden */
@@ -263,39 +267,25 @@ public class Person implements PersistenzInterface {
 	public boolean equals(Object object){
 		if(object != null && object instanceof Person) {
 			Person param = (Person) object;
-			if(param.getId() != this.id)
-				return false;
-			if(!param.getVorname().equals(this.vorname))
-				return false;
-			if(!param.getNachname().equals(this.nachname))
-				return false;
-			if(!param.getStrasse().equals(this.strasse))
-				return false;
-			if(!param.getHausnummer().equals(this.hausnummer))
-				return false;
-			if(!param.getOrt().equals(this.ort))
-				return false;
+			if(param.getID() != this.id) { return false; }
+			if(!param.getVorname().equals(this.vorname)) { return false; }
+			if(!param.getNachname().equals(this.nachname)) { return false; }
+			if(!param.getStrasse().equals(this.strasse)) { return false; }
+			if(!param.getHausnummer().equals(this.hausnummer)) { return false; }
+ 			if(!param.getOrt().equals(this.ort)) { return false; }
 			// optionaler Parameter "land":
-			if(param.getLand() == null) {
-				if(this.land != null)
-					return false;
-			}
-			else if(!param.getLand().equals(this.land))
-				return false;
-			if(!param.getPlz().equals(this.plz))
-				return false;
+			if(param.getLand() == null) { if(this.land != null) { return false; } }
+			else if(!param.getLand().equals(this.land)) { return false; }
+			if(!param.getPlz().equals(this.plz)) { return false; }
 			// optionaler Parameter "telefon"
-			if(param.getTelefon() == null) {
-				if(this.telefon != null)
-					return false;
-			} else if(!param.getTelefon().equals(this.telefon))
-				return false;
+			if(param.getTelefon() == null) { if(this.telefon != null) { return false; }}
+			else if(!param.getTelefon().equals(this.telefon)) { return false; }
 			return true;
 		}
 		return false;
 	}
 	@Override
 	public String toString(){
-		return "Person id=" + this.getId() + " " + this.getVorname() + " " + this.getNachname();
+		return "Person id=" + this.getID() + " " + this.getVorname() + " " + this.getNachname();
 	}
 }

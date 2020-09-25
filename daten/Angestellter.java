@@ -130,7 +130,7 @@ public class Angestellter implements PersistenzInterface {
 		if(this.getID() > 0) { 	// noch nicht gelesen, aber schon in DB (id ist dann > 0)
 			queryString = "SELECT * FROM angestellte WHERE id=" + this.getID();
 		} else {				// Objekt ist transient
-			if(this.getPerson().getId() > 0)
+			if(this.getPerson().getID() > 0)
 				queryString = "SELECT * FROM angestellte WHERE personID=" + this.getPerson().getID();
 			else
 				message = "Angestellter#retrieveObject: PersonID muss gesetzt sein (ist aber 0)";
@@ -179,7 +179,7 @@ public class Angestellter implements PersistenzInterface {
 			if(param.getID() != this.id) {
 				return false;
 			}
-			if(param.getPerson().getId() != this.person.getID()) {
+			if(param.getPerson().getID() != this.person.getID()) {
 				return false;
 			}
 			return true;

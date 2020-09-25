@@ -38,7 +38,7 @@ public final class ConnectionManager extends Object {
 		if (poolConnection == null) {
 			// keine Connection verfügbar
 			Class.forName(ConnectionManager.mysqlJdbcDriverClass );
-			String mysqlJdbcConnectionUrl = mysqlJdbcConnectionProtocol + host + database + "?zeroDateTimeBehavior=convertNull";
+			String mysqlJdbcConnectionUrl = mysqlJdbcConnectionProtocol + host + database + "?zeroDateTimeBehavior=convertToNull";
 			connection = DriverManager.getConnection(mysqlJdbcConnectionUrl, user, passwort);
 			if(log)
 				System.out.println("Neue Connection für \"" + user + "\" erzeugt " + sdf.format(new Date()));

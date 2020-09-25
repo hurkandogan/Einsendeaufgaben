@@ -112,7 +112,7 @@ public class Anmeldung extends JFrame implements ActionListener {
                 person = new Person(name, lastName);
             }
             dbManager.startTransaction();
-            if (person.retrieveObject(dbManager)) {
+            if (person.retrieveObject(dbManager) != null) {
                 if (angestellter == null) {
                     angestellter = new Angestellter(person);
                     angestellter.retrieveObject(dbManager);
