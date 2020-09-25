@@ -59,7 +59,6 @@ public interface PersistenzInterface extends Cloneable {
 	void setPufferKey(String pufferKey);
 
 	String getMessage();
-	void setMessage(String message);
 
 	PersistenzInterface clone() throws CloneNotSupportedException;
 }
