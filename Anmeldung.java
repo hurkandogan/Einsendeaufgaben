@@ -122,22 +122,23 @@ public class Anmeldung extends JFrame implements ActionListener {
                 // Is this person Angestellter?
                 if (angestellter == null || angestellter.getPerson().getID() != person.getID()) {
                     angestellter = new Angestellter(person);
+                }
                     if((angestellter = (Angestellter) angestellter.retrieveObject(dbManager)) != null){
                         // Is this Angestellter Abteilungsleiter?
-                        if(abteilung == null || abteilung.getAngestellter().getID() != angestellter.getID()){
+                        if(abteilung == null || abteilung.getAngestellter().getID() != angestellter.getID()) {
                             abteilung = new Abteilung(angestellter);
+                        }
                             if((abteilung = (Abteilung) abteilung.retrieveObject(dbManager)) != null){
                                 jtfStatus.setText("Zugang Erfolgreich!");
                                 dbManager.endTransaction(true);
                             } else{
                                 jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Abteilungsleiter");
+                                dbManager.endTransaction(true);
                             }
-                        }
                     }else{
                         jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Angestellter");
                         dbManager.endTransaction(true);
                     }
-                }
             } else {
                 jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Employee");
                 dbManager.endTransaction(true);
