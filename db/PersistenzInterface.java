@@ -34,7 +34,7 @@ public interface PersistenzInterface extends Cloneable {
 	/* Ändert den Objektzustand in der Datenbank (SQL-UPDATE).  */
 	boolean updateObject(DbManager dbManager);
 	/* Sucht und liest ein Objekt aus der Datenbank (SQL-SELECT).  */
-	boolean retrieveObject(DbManager dbManager);
+	PersistenzInterface retrieveObject(DbManager dbManager);
 
 	/* SQL-String Methods */
 	String getDeleteSQL();
