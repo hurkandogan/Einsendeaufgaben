@@ -80,8 +80,8 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 		jbClose.setForeground(colorWeinrot);
 		jbClose.addActionListener(this);
 		// JComboBox Abteilungen
-		//Vector<String> abteilungsnamen = dbManager.getAbteilungsnamen();
-		//jcbAbteilungen = new JComboBox(abteilungsnamen);
+		Vector<String> abteilungsnamen = dbManager.getAbteilungsnamen();
+		jcbAbteilungen = new JComboBox(abteilungsnamen);
 		// Layout-Zusammenbau - BorderLayout ist default - alle Objekte in einem Panel
 		JPanel jtfPanel=new JPanel(new GridLayout(6,3, 10, 10));
 		jtfPanel.setBorder(BorderFactory.createEmptyBorder(15,20,15,20));
@@ -102,7 +102,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 		jtfPanel.add(new Label(""));
 
 		jtfPanel.add(jlabAbteilung);
-		//jtfPanel.add(jcbAbteilungen);
+		jtfPanel.add(jcbAbteilungen);
 		jtfPanel.add(new Label(""));
 
 		jtfPanel.add(new JLabel(""));
