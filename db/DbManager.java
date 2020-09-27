@@ -332,7 +332,7 @@ public class DbManager {
 			ResultSet rs = stmt.executeQuery(abteilungNameQuery);
 			if(rs.next()){
 				abteilung = new Abteilung(rs.getInt(1));
-				if(abteilung.retrieveObject(this) != null) {
+				if((abteilung = (Abteilung) abteilung.retrieveObject(this)) != null) {
 					abteilungNames.add(abteilung.getName());
 					System.out.println("asd" + abteilung.getName());
 				}

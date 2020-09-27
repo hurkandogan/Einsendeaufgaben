@@ -27,6 +27,7 @@ public class Abteilung implements PersistenzInterface {
 	/* Constructor */
 	public Abteilung(int id){
 		this.id = id;
+		this.setPufferKey(id + ""); //This addition is not working
 	}
 
 	public Abteilung(String test){}
