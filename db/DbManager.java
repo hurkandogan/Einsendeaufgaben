@@ -325,22 +325,17 @@ public class DbManager {
 
 	public Vector<String> getAbteilungsnamen(){
 		Vector<String> abteilungNames = new Vector<String>();
-		Abteilung abteilung;
-		String abteilungNameQuery = "SELECT * FROM abteilungen";
+		String abteilungNameQuery = "SELECT id, name FROM abteilungen";
 		try {
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(abteilungNameQuery);
-			if(rs.next()){
-				abteilung = new Abteilung(rs.getInt(1));
-				if((abteilung = (Abteilung) abteilung.retrieveObject(this)) != null) {
-					abteilungNames.add(abteilung.getName());
-					System.out.println("asd" + abteilung.getName());
-				}
+			while(rs != null && rs.next()){
+				Abteilung abteilung = new Abteilung(rs.getInt(1), rs.getString(2));
+				abteilungNames.add(abteilung.getName());
 			}
 		}catch(SQLException sqle){
 			System.out.println(sqle.getMessage());
 		}
-
 		return abteilungNames;
 	}
 }

@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import jav12Einsendeaufgaben.angestellterAnmeldung.db.DbManager;
+import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung;
 
 public class Angestelltendaten extends JDialog implements ActionListener {
 
@@ -34,6 +35,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 
 	private DbManager dbManager;
 	private Angestellter angestellter;
+	private Abteilung abteilung;
 
 	public Angestelltendaten() {}
 
@@ -80,6 +82,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 		jbClose.setForeground(colorWeinrot);
 		jbClose.addActionListener(this);
 		// JComboBox Abteilungen
+		abteilung = new Abteilung();
 		Vector<String> abteilungsnamen = dbManager.getAbteilungsnamen();
 		jcbAbteilungen = new JComboBox(abteilungsnamen);
 		// Layout-Zusammenbau - BorderLayout ist default - alle Objekte in einem Panel

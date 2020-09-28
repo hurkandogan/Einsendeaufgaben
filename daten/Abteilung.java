@@ -5,11 +5,14 @@ import jav12Einsendeaufgaben.angestellterAnmeldung.db.PersistenzInterface;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Connection;
+import java.util.Vector;
 
 public class Abteilung implements PersistenzInterface {
 
 	// Logging
-	private boolean log;
+	private boolean log = true;
 
 	// Messages
 	String message = "";
@@ -24,13 +27,27 @@ public class Abteilung implements PersistenzInterface {
 	public boolean isModified() { return modified; }
 	public void setModified(boolean newValue) { this.modified = newValue; }
 
+	private DbManager dbManager;
+	private Connection connection;
+
 	/* Constructor */
+	public Abteilung(){}
+
+	public Abteilung(int id, String name){
+		this.id = id;
+		this.name = name;
+		this.setPufferKey(id + " " + name); //This addition is not working
+	}
+
 	public Abteilung(int id){
 		this.id = id;
 		this.setPufferKey(id + ""); //This addition is not working
 	}
 
-	public Abteilung(String test){}
+	public Abteilung(String name){
+		this.name = name;
+		this.setPufferKey(name); //This addition is not working
+	}
 
 	public Abteilung(Angestellter angestellter){
 		this.leiter = angestellter;
@@ -89,16 +106,16 @@ public class Abteilung implements PersistenzInterface {
 		return null;
 	}
 	public String getInsertSQL() {
-		String querySQL = null;
-		if(this.getID() > 0){
-			querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getID();
-		} else{
-			if (this.getAngestellter().getID() > 0) {
-				querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getAngestellter().getAbteilung();
-			} else {
-				message = "Abteilung#getInsertSQL: There is no person with this ID";
-			}
-		}
+//		String querySQL = null;
+//		if(this.getID() > 0){
+//			querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getID();
+//		} else{
+//			if (this.getAngestellter().getID() > 0) {
+//				querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getAngestellter().getAbteilung();
+//			} else {
+//				message = "Abteilung#getInsertSQL: There is no person with this ID";
+//			}
+//		}
 		return null;
 	}
 	public String getRetrieveSQL() {
