@@ -128,7 +128,12 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 	}
 
 	private void sucheAngestellten() {
-		// TODO: implement
+		if(checkInput()){
+			System.out.println(jtfVorname.getText() + " " + jtfNachname.getText());
+		} else {
+			jtfStatus.setText("Vorname und Nachname müssen eingegeben werden!");
+			System.out.println("Vorname und Nachname müssen eingegeben werden!");
+		}
 	}
 
 	/* setzt die GUI-Eingabe- bzw. Auswahlkomponenten (ohne Namensfelder) auf default zurück. */
