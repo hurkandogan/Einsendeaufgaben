@@ -132,12 +132,16 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 			String vorname = jtfVorname.getText();
 			String nachname = jtfNachname.getText();
 			Person person = new Person(vorname, nachname);
+			dbManager.startTransaction();
 			if(person.retrieveObject(dbManager) != null) {
 				Angestellter angestellter = new Angestellter(person);
 				if(angestellter.retrieveObject(dbManager) != null) {
 					jtfGehalt.setText(angestellter.getGehalt().toString());
-					//jtfAusscheidedatum.setText(angestellter.getAusscheidedatum().toString());
-					System.out.println(angestellter.getGehalt() + " " + angestellter.getPerson().getVorname());
+					jcbAbteilungen.setSelectedItem(angestellter.getAbteilung());
+
+					System.out.println("Abteilung ID: " + angestellter.getAbteilung().getID());
+
+					dbManager.endTransaction(true);
 				}
 			}
 		} else {
