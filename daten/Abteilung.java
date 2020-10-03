@@ -106,16 +106,6 @@ public class Abteilung implements PersistenzInterface {
 		return null;
 	}
 	public String getInsertSQL() {
-//		String querySQL = null;
-//		if(this.getID() > 0){
-//			querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getID();
-//		} else{
-//			if (this.getAngestellter().getID() > 0) {
-//				querySQL = "SELECT * FROM abteilungen WHERE id = " + this.getAngestellter().getAbteilung();
-//			} else {
-//				message = "Abteilung#getInsertSQL: There is no person with this ID";
-//			}
-//		}
 		return null;
 	}
 	public String getRetrieveSQL() {
