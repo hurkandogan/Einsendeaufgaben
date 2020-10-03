@@ -138,7 +138,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 				if(angestellter.retrieveObject(dbManager) != null) {
 					jtfGehalt.setText(angestellter.getGehalt().toString());
 					jcbAbteilungen.setSelectedItem(angestellter.getAbteilung());
-
+					// First Abteilungen should be read!
 					System.out.println("Abteilung ID: " + angestellter.getAbteilung().getID());
 
 					dbManager.endTransaction(true);
