@@ -36,6 +36,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 	private DbManager dbManager;
 	private Angestellter angestellter;
 	private Abteilung abteilung;
+	private Vector<String> abteilungsnamen;
 
 	public Angestelltendaten() {}
 
@@ -83,7 +84,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 		jbClose.addActionListener(this);
 		// JComboBox Abteilungen
 		abteilung = new Abteilung();
-		Vector<String> abteilungsnamen = dbManager.getAbteilungsnamen();
+		abteilungsnamen = dbManager.getAbteilungsnamen();
 		jcbAbteilungen = new JComboBox(abteilungsnamen);
 		// Layout-Zusammenbau - BorderLayout ist default - alle Objekte in einem Panel
 		JPanel jtfPanel=new JPanel(new GridLayout(6,3, 10, 10));
@@ -137,7 +138,12 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 				Angestellter angestellter = new Angestellter(person);
 				if(angestellter.retrieveObject(dbManager) != null) {
 					jtfGehalt.setText(angestellter.getGehalt().toString());
-					jcbAbteilungen.setSelectedItem(angestellter.getAbteilung());
+					for(int i = 0; i < abteilungsnamen.size(); i++) {
+						String abteilungName = abteilungsnamen.elementAt(i);
+						if(angestellter.getAbteilung().getName() == abteilungName) {
+							jcbAbteilungen.setSelectedItem(abteilungsnamen.elementAt(i));
+						}
+					}
 					// First Abteilungen should be read!
 					System.out.println("Abteilung ID: " + angestellter.getAbteilung().getID());
 

@@ -330,10 +330,6 @@ public class DbManager {
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(abteilungNameQuery);
 			while(rs != null && rs.next()){
-//				if(abteilung.retrieveObject(this) != null) {
-//					abteilungNames.add(abteilung.getName());
-//				}
-				// Puffer extensions needed!
 				Abteilung abteilung = new Abteilung(rs.getInt(1), rs.getString(2));
 				abteilungNames.add(abteilung.getName());
 			}
