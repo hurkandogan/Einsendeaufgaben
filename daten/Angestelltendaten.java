@@ -34,6 +34,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 	private JComboBox jcbAbteilungen;
 
 	private DbManager dbManager;
+	private Person person;
 	private Angestellter angestellter;
 	private Abteilung abteilung;
 	private Vector<String> abteilungsnamen;
@@ -132,20 +133,26 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 		if(checkInput()){
 			String vorname = jtfVorname.getText();
 			String nachname = jtfNachname.getText();
-			Person person = new Person(vorname, nachname);
+			person = new Person(vorname, nachname);
 			dbManager.startTransaction();
 			if(person.retrieveObject(dbManager) != null) {
-				Angestellter angestellter = new Angestellter(person);
-				if(angestellter.retrieveObject(dbManager) != null) {
-					jtfGehalt.setText(angestellter.getGehalt().toString());
-					for(int i = 0; i < abteilungsnamen.size(); i++) {
-						String abteilungName = abteilungsnamen.elementAt(i);
-						if(angestellter.getAbteilung().getName() == abteilungName) {
-							jcbAbteilungen.setSelectedItem(abteilungsnamen.elementAt(i));
+				angestellter = new Angestellter(person);
+
+				if((angestellter = (Angestellter) angestellter.retrieveObject(dbManager)) != null) {
+					abteilung = new Abteilung(angestellter);
+
+					if((abteilung = (Abteilung) abteilung.retrieveObject(dbManager)) != null){
+						jtfGehalt.setText(angestellter.getGehalt().toString());
+
+						for(int i = 0; i < abteilungsnamen.size(); i++) {
+							String abteilungName = abteilungsnamen.elementAt(i);
+							if(abteilungName.equalsIgnoreCase(abteilung.getName())) {
+								jcbAbteilungen.setSelectedItem(abteilungsnamen.elementAt(i));
+							}
 						}
 					}
-					// First Abteilungen should be read!
-					System.out.println("Abteilung ID: " + angestellter.getAbteilung().getID());
+
+
 
 					dbManager.endTransaction(true);
 				}

@@ -1,5 +1,6 @@
 package jav12Einsendeaufgaben.angestellterAnmeldung.db;
 
+import jav12Einsendeaufgaben.angestellterAnmeldung.Anmeldung;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Angestellter;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Person;
