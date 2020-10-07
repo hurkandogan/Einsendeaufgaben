@@ -75,6 +75,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 		jtfStatus.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		jtfStatus.setForeground(Color.white);
 		jtfStatus.setBackground(Color.black);
+		jtfStatus.setEditable(false);
 		// Schaltflächen
 		jbSuchen = new JButton("Suchen");
 		jbSuchen.addActionListener(this);

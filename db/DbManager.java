@@ -330,11 +330,11 @@ public class DbManager {
 		try {
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(abteilungNameQuery);
-			while(rs != null && rs.next()){
+			while (rs != null && rs.next()) {
 				Abteilung abteilung = new Abteilung(rs.getString(1));
 				abteilungNames.add(abteilung.getName());
 			}
-		}catch(SQLException sqle){
+		} catch(SQLException sqle){
 			System.out.println(sqle.getMessage());
 		}
 		return abteilungNames;

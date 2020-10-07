@@ -33,6 +33,12 @@ public class Abteilung implements PersistenzInterface {
 	/* Constructor */
 	public Abteilung(){}
 
+	public Abteilung(int id, String name){
+		this.id = id;
+		this.name = name;
+		this.setPufferKey(id + " " + name);
+	}
+
 	public Abteilung(int id){
 		this.id = id;
 		this.setPufferKey(id + ""); //This addition is not working
@@ -94,7 +100,7 @@ public class Abteilung implements PersistenzInterface {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	/* ****** SQL-Anweisungen erstellen ****** */
+	/* ****** SQL - Anweisungen erstellen ****** */
 	public String getDeleteSQL() {
 		// TODO Auto-generated method stub
 		return null;
@@ -106,16 +112,18 @@ public class Abteilung implements PersistenzInterface {
 		String queryString = null;
 		if(this.getID() > 0){
 			queryString = "SELECT id, name, leiterID FROM abteilungen WHERE id = " + this.getID();
-		}else{
-			if(this.getAngestellter().getID() > 0) {
-				queryString = "SELECT id, name, leiterID FROM abteilungen WHERE leiterID = " + this.getAngestellter().getID();
-			}else{
-				message = "Abteilungen#getRetrieveSQL: personID should be given!";
-				if(log) {
-					System.out.println(message);
+		} else if (((String) this.getName()) != null && !this.getName().equals("")){
+			queryString = "SELECT id, name, leiterID FROM abteilungen WHERE name='" + this.getName() + "'";
+		} else {
+				if(this.getAngestellter().getID() > 0) {
+					queryString = "SELECT id, name, leiterID FROM abteilungen WHERE leiterID = " + this.getAngestellter().getID();
+				} else {
+					message = "Abteilungen#getRetrieveSQL: personID should be given!";
+					if(log) {
+						System.out.println(message);
+					}
 				}
 			}
-		}
 		return queryString;
 	}
 
