@@ -134,7 +134,9 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 			String vorname = jtfVorname.getText();
 			String nachname = jtfNachname.getText();
 			person = new Person(vorname, nachname);
+
 			dbManager.startTransaction();
+
 			if(person.retrieveObject(dbManager) != null) {
 				angestellter = new Angestellter(person);
 
@@ -151,9 +153,6 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 							}
 						}
 					}
-
-
-
 					dbManager.endTransaction(true);
 				}
 			}

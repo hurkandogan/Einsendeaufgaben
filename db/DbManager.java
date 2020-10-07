@@ -326,12 +326,12 @@ public class DbManager {
 
 	public Vector<String> getAbteilungsnamen(){
 		Vector<String> abteilungNames = new Vector<String>();
-		String abteilungNameQuery = "SELECT id, name FROM abteilungen";
+		String abteilungNameQuery = "SELECT name FROM abteilungen";
 		try {
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(abteilungNameQuery);
 			while(rs != null && rs.next()){
-				Abteilung abteilung = new Abteilung(rs.getInt(1), rs.getString(2));
+				Abteilung abteilung = new Abteilung(rs.getString(1));
 				abteilungNames.add(abteilung.getName());
 			}
 		}catch(SQLException sqle){
