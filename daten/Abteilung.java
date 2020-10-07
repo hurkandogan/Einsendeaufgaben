@@ -33,12 +33,6 @@ public class Abteilung implements PersistenzInterface {
 	/* Constructor */
 	public Abteilung(){}
 
-	public Abteilung(int id, String name){
-		this.id = id;
-		this.name = name;
-		this.setPufferKey(id + " " + name); //This addition is not working
-	}
-
 	public Abteilung(int id){
 		this.id = id;
 		this.setPufferKey(id + ""); //This addition is not working
