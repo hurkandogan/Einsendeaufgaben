@@ -27,7 +27,6 @@ public class DbManager {
 	public List<PersistenzInterface> getFailedUpdateObjects() { return failedUpdateObjects; }
 
 	private boolean log = true;
-	public void setLog(boolean log) { this.log = log; }
 
 	/*  ******** Konstruktoren   ******** */
 	public DbManager() {}
@@ -331,8 +330,7 @@ public class DbManager {
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(abteilungNameQuery);
 			while (rs != null && rs.next()) {
-				Abteilung abteilung = new Abteilung(rs.getString(1));
-				abteilungNames.add(abteilung.getName());
+				abteilungNames.add(rs.getString(1));
 			}
 		} catch(SQLException sqle){
 			System.out.println(sqle.getMessage());
