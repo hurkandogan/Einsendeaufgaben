@@ -51,7 +51,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 			}
 		}); // TODO: Bu method Anmeldung penceresi icinde yazilmali
 		this.createGUI();
-		this.setSize(600,290);
+		this.setSize(600,300);
 		// setVisible-Aufruf durch "owner"!
 		Point ownerLoc = owner.getLocation();
 		this.setLocation(ownerLoc.x + 40, ownerLoc.y + 40);
@@ -132,35 +132,42 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 
 	private void sucheAngestellten() {
 		if(checkInput()){
-			String vorname = jtfVorname.getText();
-			String nachname = jtfNachname.getText();
+			String vorname = jtfVorname.getText().trim();
+			String nachname = jtfNachname.getText().trim();
 			person = new Person(vorname, nachname);
-
-			dbManager.startTransaction();
-
-			if(person.retrieveObject(dbManager) != null) {
-				angestellter = new Angestellter(person);
-
-				if((angestellter = (Angestellter) angestellter.retrieveObject(dbManager)) != null) {
-					abteilung = new Abteilung(angestellter);
-
-					if((abteilung = (Abteilung) abteilung.retrieveObject(dbManager)) != null){
-						jtfGehalt.setText(angestellter.getGehalt().toString());
-
-						for(int i = 0; i < abteilungsnamen.size(); i++) {
-							String abteilungName = abteilungsnamen.elementAt(i);
-							if(abteilungName.equalsIgnoreCase(abteilung.getName())) {
-								jcbAbteilungen.setSelectedItem(abteilungsnamen.elementAt(i));
-							}
-						}
-					}
-					dbManager.endTransaction(true);
-				}
+			person = (Person) person.retrieveObject(dbManager);
+			if(person == null) {
+				System.out.println("Person is not found!");
+				jtfStatus.setText("Person is not found!");
+				this.resetTextfelder();
+				return;
+			} else {
+				System.out.println("Person found!");
+				jtfStatus.setText("Person found!");
 			}
+			angestellter = new Angestellter(person);
+			angestellter = (Angestellter) angestellter.retrieveObject(dbManager);
+				try {
+					if(isAngestellterFound(angestellter)) {
+						System.out.println("Works: " + angestellter.toString());
+						System.out.println("Works2: " + angestellter.getAbteilung().getName());
+						angestellter.setAbteilung(dbManager);
+						zeigeDaten();
+					} else {
+						this.resetTextfelder();
+					}
+				}catch(NullPointerException npe) {
+					this.resetTextfelder();
+					System.out.println(npe.toString());
+				}
 		} else {
 			jtfStatus.setText("Vorname und Nachname müssen eingegeben werden!");
 			System.out.println("Vorname und Nachname müssen eingegeben werden!");
 		}
+	}
+	private boolean isAngestellterFound(Angestellter angestellter) {
+		return angestellter.getGeschlecht() != null || angestellter.getGehalt() != 0 || angestellter.getAbtID() != 0
+				|| angestellter.getEinstellungsDatum() != null;
 	}
 
 	/* setzt die GUI-Eingabe- bzw. Auswahlkomponenten (ohne Namensfelder) auf default zurück. */
@@ -216,7 +223,9 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 				return false;
 			}
 			Abteilung abteilung = new Abteilung((String)jcbAbteilungen.getSelectedItem());
-			angestellter.setAbteilung((Abteilung) abteilung.retrieveObject(dbManager));
+			abteilung = (Abteilung) abteilung.retrieveObject(dbManager);
+			angestellter.setAbteilung(abteilung);
+			angestellter.setAbtID(abteilung.getID());
 			return true;
 		}
 		return false;

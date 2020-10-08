@@ -34,10 +34,7 @@ public class Angestellter implements PersistenzInterface {
 	// Properties
 	private int id;
 	public int getID(){ return id; }
-	public void setID(int id){
-		this.id = id;
-		this.setModified(true);
-	}
+	public void setID(int id){ this.id = id; this.setModified(true); }
 
 	private Abteilung abteilung;
 	public Abteilung getAbteilung(){ return abteilung; }
@@ -45,50 +42,78 @@ public class Angestellter implements PersistenzInterface {
 		this.abteilung = abteilung;
 		this.setModified(true);
 	}
-	private String geschlecht;
-	public String getGeschlecht() { return geschlecht; }
-	public void setGeschlecht(String geschlecht) { this.geschlecht = geschlecht;  this.setModified(true); }
+	public void setAbteilung(DbManager dbManager){
+		System.out.println("SETABTEILUNG " + abteilung.getID());
+		System.out.println("ABTEILUNGTOSTRING " + abteilung.toString());
+		abteilung = (Abteilung) dbManager.executeRetrieve(abteilung);
+	}
+	private String pufferKey;
+	@Override
+	public String getPufferKey() { return pufferKey; }
+	@Override
+	public void setPufferKey(String pufferKey) {
+		if(this.pufferKey == null){ this.pufferKey = pufferKey; }
+	}
+	private boolean isAbteilungsleiter;
+	public boolean isAbteilungsleiter(){ return isAbteilungsleiter; }
+	public void setAbteilungsleiter(boolean isAbteilungsleiter){ this.isAbteilungsleiter = isAbteilungsleiter; }
 
 	private Person person;
 	public Person getPerson() { return person; }
 	public void setPerson(Person person) { this.person = person;  this.setModified(true); }
 
-	private String versicherungsNummer;
-	public String getVersicherungsNummer(){ return versicherungsNummer; }
-	public void setVersicherungsNummer(String versicherungsNummer){
-		this.versicherungsNummer = versicherungsNummer;
-		this.setModified(true);
-	}
+	private int abtID;
+	public int getAbtID(){ return abtID; }
+	public void setAbtID(int abtID){ this.abtID = abtID; this.setModified(true); }
+
+	private String versicherungsNr;
+	public String getVersicherungsNr(){ return versicherungsNr; }
+	public void setVersicherungsNr(String versicherungsNr){ this.versicherungsNr = versicherungsNr; this.setModified(true); }
 
 	private Float gehalt;
 	public Float getGehalt(){ return gehalt; }
-	public void setGehalt(Float gehalt){
-		this.gehalt = gehalt;
-		this.setModified(true);
-	}
+	public void setGehalt(Float gehalt){ this.gehalt = gehalt; this.setModified(true); }
 
 	private Date einstellungsDatum;
 	public Date getEinstellungsDatum(){ return einstellungsDatum; }
-	public void setEinstellungsDatum(Date einstellungsDatum){
-		this.einstellungsDatum = einstellungsDatum;
-		this.setModified(true);
-	}
+	public void setEinstellungsDatum(Date einstellungsDatum){ this.einstellungsDatum = einstellungsDatum; this.setModified(true); }
 
 	private Date ausscheidedatum;
 	public Date getAusscheidedatum(){ return ausscheidedatum; }
-	public void setAusscheidedatum(Date ausscheidedatum){
-		this.ausscheidedatum = ausscheidedatum;
-		this.setModified(true);
-	}
+	public void setAusscheidedatum(Date ausscheidedatum){ this.ausscheidedatum = ausscheidedatum; this.setModified(true); }
 
 	private Date geburtsdatum;
 	public Date getGeburtsdatum(){ return geburtsdatum; }
-	public void setGeburtsdatum(Date geburtsdatum){
-		this.geburtsdatum = geburtsdatum;
-		this.setModified(true);
-	}
+	public void setGeburtsdatum(Date geburtsdatum){ this.geburtsdatum = geburtsdatum; this.setModified(true); }
 
-	/* ****** Datenbankoperationen ****** */
+	private String geschlecht;
+	public String getGeschlecht() { return geschlecht; }
+	public void setGeschlecht(String geschlecht) { this.geschlecht = geschlecht;  this.setModified(true); }
+
+	/******* Databaseoperations *******/
+	@Override
+	public boolean insertObject(DbManager dbManager) {
+		if(this.isPersistent()){
+			message = "Angestellter#inserObject: No data to save!";
+			return false;
+		} else if (this.getPerson().getID() > 0) {
+			if (dbManager.executeRetrieve(this) != null){
+				message = "Angestellter#inserObject: This person " + this.getPerson().getVorname() + " " + this.getPerson().getNachname() + " is already in Database";
+				return false;
+			}
+			if(dbManager.executeInsert(this)){
+				message = "Angestellter#inserObject: This person " + this.getPerson().getVorname() + " " + this.getPerson().getNachname() + " is added to Database!";
+				return true;
+			} else {
+				message = "Angestellter#inserObject: Error! Person could not be added!";
+				return false;
+			}
+		} else {
+			message = "Angestellter#inserObject: This person has no Person ID!";
+			return false;
+		}
+	}
+	@Override
 	public PersistenzInterface retrieveObject(DbManager dbManager) {
 		PersistenzInterface piObj = null;
 		if(this.isPersistent()) {
@@ -103,28 +128,44 @@ public class Angestellter implements PersistenzInterface {
 			}
 		}
 	}
-	public boolean deleteObject(DbManager dbManager) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	@Override
 	public boolean updateObject(DbManager dbManager) {
-		// TODO Auto-generated method stub
+		if(this.isPersistent() && this.isModified()){
+			if(this.getPerson() != null){
+				if(dbManager.executeUpdate(this)){
+					message = "Angestellter#updateObject: Update is successful!";
+					return true;
+				} else {
+					message = "Angestellter#updateObject: Error! Update is not successful!";
+					return false;
+				}
+			} else {
+				message = "Angestellter#updateObject: Error! This is not a Person!";
+			}
+		}
 		return false;
 	}
-	public boolean insertObject(DbManager dbManager) {
-		// TODO Auto-generated method stub
+	@Override
+	public boolean deleteObject(DbManager dbManager) {
+		if (this.isPersistent()){
+			if (dbManager.executeDelete(this)){
+				return true;
+			} else {
+				message = "Angestellter#deleteObject: Error! Angestellter is not deleted!";
+				return false;
+			}
+		}
 		return false;
 	}
-	/* ****** SQL-Anweisungen erstellen ****** */
-	public String getDeleteSQL() {
 
-		// TODO Auto-generated method stub
-		return null;
-	}
+	/* ****** SQL-Anweisungen erstellen ****** */
+	@Override
 	public String getInsertSQL() {
-		// TODO Auto-generated method stub
-		return null;
+		String queryString = "INSERT INTO angestellte VALUES(Null, " + this.getAbtID() + ", '" + this.getVersicherungsNr() + "', " + this.getGehalt() + ", '"
+				+ this.getEinstellungsDatum() + "', '" + this.getAusscheidedatum() + "', '" + this.getGeburtsdatum() + "', '" + this.getGeschlecht() + "')";
+		return queryString;
 	}
+	@Override
 	public String getRetrieveSQL() {
 		String queryString = null;
 		if(this.getID() > 0) { 	// noch nicht gelesen, aber schon in DB (id ist dann > 0)
@@ -137,32 +178,51 @@ public class Angestellter implements PersistenzInterface {
 		}
 		return queryString;
 	}
-
+	@Override
 	public String getUpdateSQL() {
-		// TODO Auto-generated method stub
+		if (this.getPerson() != null) {
+			if (this.getAusscheidedatum() != null) {
+				String queryString = "UPDATE angestellte SET abtID=" + this.getAbtID() + ", personID="
+						+ this.getPerson().getID() + ", versicherungsnr=" + this.getVersicherungsNr() + ", gehalt="
+						+ this.getGehalt() + ", einstellungsdatum='" + this.getEinstellungsDatum() + "' "
+						+ ", ausscheidedatum='" + this.getAusscheidedatum() + "' " + ", geburtsdatum='"
+						+ this.getGeburtsdatum() + "' " + ", geschlecht='" + this.getGeschlecht() + "'" + " WHERE id=" + this.getID();
+				return queryString;
+			} else {
+				String queryString = "UPDATE angestellte SET abtID=" + this.getAbtID() + ", personID="
+						+ this.getPerson().getID() + ", versicherungsnr=" + this.getVersicherungsNr() + ", gehalt="
+						+ this.getGehalt() + ", einstellungsdatum='" + this.getEinstellungsDatum() + "' "
+						+ ", ausscheidedatum='0000-00-00', " + "geburtsdatum='" + this.getGeburtsdatum() + "' " + ", geschlecht='" + this.getGeschlecht() + "'" + " WHERE id=" + this.getID();
+				return queryString;
+			}
+		}
 		return null;
 	}
+	@Override
+	public String getDeleteSQL() {
+		String queryString = "DELETE FROM angestellte WHERE personID = " + this.getPerson().getID();
+		return queryString;
+	}
+	@Override
 	public boolean loadObjProps(ResultSet rs) {
 		try {
-			if(rs != null && rs.next()) {
+			if (rs != null && rs.next()) {
 				this.setID(rs.getInt(1));
-				int newID = rs.getInt(2);
-				if(abteilung == null)	//für temporäre Objekte
+				this.setAbtID(rs.getInt(2));
+				if (abteilung == null)    //für temporäre Objekte
 					abteilung = new Abteilung(rs.getInt(2));
-				if(newID != this.getAbteilung().getID()) { // sonst würde das eingebettete Person-Objekt als "verändert" markiert!
-					this.getAbteilung().setID(newID);
+				if (this.getAbtID() != this.getAbteilung().getID()) { // sonst würde das eingebettete Person-Objekt als "verändert" markiert!
+					this.getAbteilung().setID(this.getAbtID());
 				}
-					this.setVersicherungsNummer(rs.getString(3));
-					this.setGehalt(rs.getFloat(4));
-					this.setEinstellungsDatum(rs.getDate(5));
-					this.setAusscheidedatum(rs.getDate(6));
-					this.setGeburtsdatum(rs.getDate(7));
-					this.setGeschlecht(rs.getString(8));
-					newID = rs.getInt(9);
-				if(person == null)	//für temporäre Objekte
-					person = new Person(newID);
-				if(newID != this.getPerson().getID()) // sonst würde das eingebettete Person-Objekt als "verändert" markiert!
-					this.getPerson().setID(newID);
+				this.setVersicherungsNr(rs.getString(3));
+				this.setGehalt(rs.getFloat(4));
+				this.setEinstellungsDatum(rs.getDate(5));
+				this.setAusscheidedatum(rs.getDate(6));
+				this.setGeburtsdatum(rs.getDate(7));
+				this.setGeschlecht(rs.getString(8));
+				int newPersonID = rs.getInt(9);
+				if (person == null){ person = new Person(newPersonID); }
+				if(newPersonID != this.getPerson().getID()) { this.getPerson().setID(newPersonID); }
 				return true;
 			}
 		} catch (SQLException sqle) {
@@ -170,8 +230,7 @@ public class Angestellter implements PersistenzInterface {
 		}
 		return false;
 	}
-
-	/* ******* sonstige Hilfsmethoden ****** */
+	/******** sonstige Hilfsmethoden *******/
 	@Override
 	public boolean equals(Object object){
 		if(object != null && object instanceof Angestellter) {
@@ -186,25 +245,19 @@ public class Angestellter implements PersistenzInterface {
 		}
 		return false;
 	}
-
 	@Override
 	public String toString() {
-		return "Angestellter id=" + id + " " + this.getPerson() + ", Abteilung " + abteilung;
+		return "Angestellter id=" + this.getID() + " " + this.getPerson() + ", " + "AbteilungsID= " + this.getAbtID()
+				+ " " + "Vers Nr= " + getVersicherungsNr() + " " + "Gehalt= " + getGehalt() + " " + "Einstellungsdatum= "
+				+ getEinstellungsDatum() + " " + "Ausscheidedatum= " + getAusscheidedatum() + " " + "Geburtsdatum= "
+				+ getGeburtsdatum() + " " + "Geschlecht= " + getGeschlecht();
 	}
-	private String pufferKey;
-	@Override
-	public String getPufferKey() {
-		return pufferKey;
-	}
-	@Override
-	public void setPufferKey(String pufferKey) {
-		if(this.pufferKey == null){
-			this.pufferKey = pufferKey;
-		}
-	}
-
 	@Override
 	public PersistenzInterface clone() throws CloneNotSupportedException {
-		return abteilung;
+		Angestellter angestellter  = (Angestellter) super.clone();
+		if(this.id == 0 || this.person == null){ return null; }
+		angestellter.setPerson((Person) this.person.clone());
+		angestellter.setModified(false);
+		return angestellter;
 	}
 }
