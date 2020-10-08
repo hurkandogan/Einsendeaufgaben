@@ -71,11 +71,46 @@ public class Abteilung implements PersistenzInterface {
 	public Angestellter getAngestellter() { return leiter; }
 	public void setAngestellter(Angestellter leiter) { this.leiter = leiter; this.setModified(true);}
 
+	private int leiterID;
+	public int getLeiterID(){ return leiterID; }
+	public void setLeiterID(int leiterID){ this.leiterID = leiterID; }
+
+	private String pufferKey;
+	@Override
+	public String getPufferKey() { return pufferKey; }
+
+	@Override
+	public void setPufferKey(String pufferKey) {
+		if(this.pufferKey == null){
+			this.pufferKey = pufferKey;
+		}
+	}
+
+
 	/* ****** Datenbankoperationen ****** */
+	@Override
+	public boolean insertObject(DbManager dbManager) {
+		if(this.isPersistent()){
+			message = "Abteilung#insertObject: Abteilung ist gespeichert.";
+			return false;
+		} else if (this.id > 0){
+			if(dbManager.executeRetrieve(this) == null){
+				message = "Abteilung#insertObject: Abteilung is already in Database.";
+				return false;
+			}
+		}
+		if(dbManager.executeInsert(this)){
+			return true;
+		}else{
+			message = "Abteilung#insertObject: Fehler beim Einfügen der Abteilung (id= " + id + ")";
+			return false;
+		}
+	}
+	@Override
 	public PersistenzInterface retrieveObject(DbManager dbManager) {
 		PersistenzInterface piObjekt = null;
 		if(this.isPersistent()){
-			message = "Abteilung#retrieveObject: Der Abteilungsleiter wurde schon ausder DB gelesen.";
+			message = "Abteilung#retrieveObject: Der Abteilungsleiter wurde schon aus der DB gelesen.";
 			if(log) { System.out.println(message); }
 			return this;
 		} else {
@@ -88,55 +123,67 @@ public class Abteilung implements PersistenzInterface {
 			}
 		}
 	}
+	@Override
 	public boolean deleteObject(DbManager dbManager) {
-		// TODO Auto-generated method stub
-		return false;
+		if(this.isPersistent()) {
+			if(dbManager.executeDelete(this)){
+				return true;
+			} else {
+				message = "Abteilung#deleteObject: Error with deleting Abteilung!";
+				return false;
+			}
+		} else {
+			message = "Abteilung#insertObject: Abteilung ist transient, kann daher nicht in der DB gelöscht werden";
+			return false;
+		}
 	}
+	@Override
 	public boolean updateObject(DbManager dbManager) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	public boolean insertObject(DbManager dbManager) {
-		// TODO Auto-generated method stub
+		if(this.isPersistent() && this.isModified()){
+			if(dbManager.executeUpdate(this)){
+				message = "Abteilung#updateObject: Update is done!";
+				return true;
+			} else {
+				message = "Abteilung#updateObject: Error with the update";
+				System.out.println(message);
+				return false;
+			}
+		}
 		return false;
 	}
 	/* ****** SQL - Anweisungen erstellen ****** */
+	@Override
 	public String getDeleteSQL() {
-		// TODO Auto-generated method stub
-		return null;
+		String queryString = "DELETE FROM abteilungen WHERE id = " + this.getID();
+		return queryString;
 	}
+	@Override
 	public String getInsertSQL() {
-		return null;
+		String queryString = "INSERT INTO abteilungen WHERE id = " + this.getID();
+		return queryString;
 	}
+	@Override
 	public String getRetrieveSQL() {
 		String queryString = null;
 		if(this.getID() > 0){
 			queryString = "SELECT id, name, leiterID FROM abteilungen WHERE id = " + this.getID();
-		} else if (((String) this.getName()) != null && !this.getName().equals("")){
+		} else if (((this.getName()) != null) && (!this.getName().equals(""))){
 			queryString = "SELECT id, name, leiterID FROM abteilungen WHERE name='" + this.getName() + "'";
-		} else {
-				if(this.getAngestellter().getID() > 0) {
-					queryString = "SELECT id, name, leiterID FROM abteilungen WHERE leiterID = " + this.getAngestellter().getID();
-				} else {
-					message = "Abteilungen#getRetrieveSQL: personID should be given!";
-					if(log) {
-						System.out.println(message);
-					}
-				}
-			}
+		}
 		return queryString;
 	}
-
+	@Override
 	public String getUpdateSQL() {
-		// TODO Auto-generated method stub
-		return null;
+		String queryString = "UPDATE abteilungen SET leiterID = " + this.getLeiterID() + ", name = '" + this.getName() + "' WHERE id = " + this.getID();
+		return queryString;
 	}
-
+	@Override
 	public boolean loadObjProps(ResultSet rs) {
 		try {
 			if(rs != null && rs.next()){
 				this.setID(rs.getInt(1));
 				this.setName(rs.getString(2));
+				this.setLeiterID(rs.getInt(3));
 				message = "Abteilung datas read from ResultSet";
 				if(log){
 					System.out.println(message);
@@ -158,11 +205,9 @@ public class Abteilung implements PersistenzInterface {
 	public boolean equals(Object object){
 		if(object != null && object instanceof Abteilung){
 			Abteilung param = (Abteilung) object;
-			if(param.getID() != this.id){
-				return false;
-			} else if (param.getAngestellter().getID() != this.leiter.getID()){
-				return false;
-			}
+			if(param.getID() != this.id){ return false; }
+			if (!param.getName().equals(this.getName())){ return false; }
+			if(param.getLeiterID() != this.getLeiterID()) { return false; }
 			return true;
 		}
 		return false;
@@ -170,22 +215,15 @@ public class Abteilung implements PersistenzInterface {
 
 	@Override
 	public String toString() {
-		return  "Abteilung-ID= " + id + " " + this.getAngestellter();
-	}
-
-	private String pufferKey;
-	@Override
-	public String getPufferKey() { return pufferKey; }
-
-	@Override
-	public void setPufferKey(String pufferKey) {
-		if(this.pufferKey == null){
-			this.pufferKey = pufferKey;
-		}
+		return  "Abteilung-ID= " + id + ", Abteilungsname:  " + this.getName();
 	}
 
 	@Override
 	public PersistenzInterface clone() throws CloneNotSupportedException {
-		return leiter;
+		Abteilung abteilung = (Abteilung) super.clone();
+		if(this.id == 0 || this.getLeiterID() == 0 || this.getName() == null)
+			return null;
+		abteilung.setModified(false);
+		return abteilung;
 	}
 }
