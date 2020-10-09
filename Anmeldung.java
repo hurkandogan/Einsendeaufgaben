@@ -31,12 +31,6 @@ public class Anmeldung extends JFrame implements ActionListener {
     private Angestellter angestellter;
     private Abteilung abteilung;
 
-    private String firstName, lastName;
-    public String getFirstName(){ return firstName; }
-    public void setFirstName(String value){ firstName = value; }
-    public String getLastName(){ return lastName; }
-    public void setLastName(String value){ lastName = value; }
-
     // Constructor
     public Anmeldung(String title) {
         this.addWindowListener(new WindowAdapter() {
@@ -137,6 +131,7 @@ public class Anmeldung extends JFrame implements ActionListener {
                             jtfStatus.setText("Zugang Erfolgreich!");
                             Angestelltendaten ad = new Angestelltendaten(this, dbManager);
                             ad.setVisible(true);
+                            dbManager.endTransaction(true);
                         }
                     }else{
                         jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Angestellter");

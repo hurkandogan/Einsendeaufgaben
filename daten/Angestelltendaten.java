@@ -41,6 +41,19 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 
 	public Angestelltendaten(Frame owner, DbManager dbManager) {
 		super(owner, "Angestelltendaten bearbeiten", true);
+		// dbManager works not properly after Anmeldung Frame.
+		dbManager = null;
+		try {
+			if (dbManager == null) {
+				System.out.println("Verbindung wird aufgebaut");
+				dbManager = new DbManager("localhost", "demo-user", new char[0]);
+				System.out.println("Verbindung erfolgreich aufgebaut");
+			}
+		} catch (ClassNotFoundException cnfe) {
+			System.out.println(cnfe.toString());
+		} catch (SQLException sqle) {
+			System.out.println(sqle.toString());
+		}
 		this.dbManager = dbManager;
 		this.addWindowListener(new WindowAdapter() {
 			@Override
@@ -199,7 +212,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 				return false;
 			}
 			String datumStr = jtfAusscheidedatum.getText();
-			// Kontrolle auf k e i n Datum
+			// Kontrolle auf kein Datum
 			if(datumStr.equals(""))
 				angestellter.setAusscheidedatum(null);
 			// Kontrolle korrektes Datumsformat
@@ -241,8 +254,9 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 	private void closeActionPerformed() {
 		this.setVisible(false);
 		this.dispose();
-		if(onlyTest)
+		if(onlyTest) {
 			System.exit(0);
+		}
 	}
 	/* In Gegensatz zu Lektion 5 werden hier updates einzeln ausgeführt.
 	 * "updateAll" wäre aber auch verwendbar, wenn dies beim EventHandling der beiden
@@ -250,6 +264,7 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 	private void aktualisierenActionPerformed() {
 		if(this.leseTextfelder()) {
 			angestellter.updateObject(dbManager);
+			System.out.println("After update: " + angestellter.toString());
 		} else
 			return;	// dadurch bleiben Fehlermeldungen beim Update in der Statusleiste
 		java.util.Date date = new java.util.Date();

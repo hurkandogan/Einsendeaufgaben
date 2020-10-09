@@ -155,7 +155,7 @@ public class DbManager {
 			}
 		} catch (SQLException sqle){
 			message += "\nLöschen misslungen: " + sqle.getMessage();
-			System.out.println("DbManager.executeDelete - " + sqle.toString());
+			System.out.println("DbManager#executeDelete - " + sqle.toString());
 			return false;
 		}
 	}
