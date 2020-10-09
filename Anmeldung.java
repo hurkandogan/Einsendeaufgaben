@@ -50,6 +50,9 @@ public class Anmeldung extends JFrame implements ActionListener {
         new Anmeldung("Anmeldung");
     }
 
+    /**
+     * User Interface
+     */
     public void createGUI() {
         // Labels
         jlHeadline = new JLabel("Personalverwaltung - Zugang nur für Abteilungsleiter", JLabel.CENTER);
@@ -151,6 +154,9 @@ public class Anmeldung extends JFrame implements ActionListener {
         System.exit(0);
     }
 
+    /**
+     * DbManager initialize
+     */
     public void getDbManager() {
         char[] passArray = jpfPassword.getPassword();
         try {
@@ -171,5 +177,4 @@ public class Anmeldung extends JFrame implements ActionListener {
             jtfStatus.setText("Anmeldung#getDbManager: " + sqle.getMessage());
         }
     }
-
 }
