@@ -49,12 +49,12 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 			public void windowClosing(WindowEvent we) {
 				Angestelltendaten.this.closeActionPerformed();
 			}
-		}); // TODO: Bu method Anmeldung penceresi icinde yazilmali
+		});
 		this.createGUI();
 		this.setSize(600,300);
 		// setVisible-Aufruf durch "owner"!
 		Point ownerLoc = owner.getLocation();
-		this.setLocation(ownerLoc.x + 40, ownerLoc.y + 40);
+		this.setLocation(ownerLoc.x + 600, ownerLoc.y);
 		jtfStatus.setText("Beginnen Sie mit der Suche nach einem Angestellten");
 	}
 
@@ -149,8 +149,6 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 			angestellter = (Angestellter) angestellter.retrieveObject(dbManager);
 				try {
 					if(isAngestellterFound(angestellter)) {
-						System.out.println("Works: " + angestellter.toString());
-						System.out.println("Works2: " + angestellter.getAbteilung().getName());
 						angestellter.setAbteilung(dbManager);
 						zeigeDaten();
 					} else {

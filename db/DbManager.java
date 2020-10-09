@@ -337,4 +337,22 @@ public class DbManager {
 		}
 		return abteilungNames;
 	}
+
+	public boolean checkForAbteilungsleiter(String queryString) {
+		String selectString = queryString;
+		Statement stmt;
+		try {
+			stmt = connection.createStatement();
+			System.out.println(selectString);
+			ResultSet rs = stmt.executeQuery(selectString);
+			if(rs.next() == false) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			return false;
+		}
+	}
 }

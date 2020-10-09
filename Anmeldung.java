@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Angestellter;
 import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Person;
@@ -37,7 +39,12 @@ public class Anmeldung extends JFrame implements ActionListener {
 
     // Constructor
     public Anmeldung(String title) {
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                Anmeldung.this.exitAction();
+            }
+        });
         this.createGUI();
         this.setSize(600, 300);
         this.setLocation(100, 100);
@@ -124,19 +131,13 @@ public class Anmeldung extends JFrame implements ActionListener {
                 if (angestellter == null || angestellter.getPerson().getID() != person.getID()) {
                     angestellter = new Angestellter(person);
                 }
-                    if((angestellter = (Angestellter) angestellter.retrieveObject(dbManager)) != null){
+                    if ((angestellter = (Angestellter) angestellter.retrieveObject(dbManager)) != null){
                         // Is this Angestellter Abteilungsleiter?
-                        if(abteilung == null || abteilung.getAngestellter().getID() != angestellter.getID()) {
-                            abteilung = new Abteilung(angestellter);
+                        if (angestellter.checkIfAbteilungsleiter(dbManager)){
+                            jtfStatus.setText("Zugang Erfolgreich!");
+                            Angestelltendaten ad = new Angestelltendaten(this, dbManager);
+                            ad.setVisible(true);
                         }
-                            if((abteilung = (Abteilung) abteilung.retrieveObject(dbManager)) != null){
-                                jtfStatus.setText("Zugang Erfolgreich!");
-                                new Angestelltendaten(this, dbManager);
-                                dbManager.endTransaction(true);
-                            } else{
-                                jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Abteilungsleiter");
-                                dbManager.endTransaction(true);
-                            }
                     }else{
                         jtfStatus.setText("Zugang Verweigert: " + name + " " + lastName + " ist kein Angestellter");
                         dbManager.endTransaction(true);
@@ -149,6 +150,7 @@ public class Anmeldung extends JFrame implements ActionListener {
     }
 
     public void exitAction() {
+        setVisible(false);
         this.dispose();
         System.exit(0);
     }

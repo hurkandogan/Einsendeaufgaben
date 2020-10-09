@@ -260,4 +260,11 @@ public class Angestellter implements PersistenzInterface {
 		angestellter.setModified(false);
 		return angestellter;
 	}
+
+	public boolean checkIfAbteilungsleiter(DbManager dbManager) {
+		String queryString = "SELECT * from angestellte a , abteilungen ab, personen p WHERE ab.leiterID = a.ID AND p.ID = a.personID AND p.vorname = '"
+				+ this.getPerson().getVorname() + "' AND p.nachname = '" + this.getPerson().getNachname() + "'";
+		System.out.println(this.getPerson().getVorname() + " " + this.getPerson().getNachname() + "check if Abteilungsleiter " + dbManager.checkForAbteilungsleiter(queryString));
+		return dbManager.checkForAbteilungsleiter(queryString);
+	}
 }
