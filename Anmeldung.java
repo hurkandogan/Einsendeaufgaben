@@ -145,6 +145,7 @@ public class Anmeldung extends JFrame implements ActionListener {
     }
 
     public void exitAction() {
+        dbManager.cleanup();
         setVisible(false);
         this.dispose();
         System.exit(0);

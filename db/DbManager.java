@@ -1,11 +1,5 @@
 package jav12Einsendeaufgaben.angestellterAnmeldung.db;
 
-import jav12Einsendeaufgaben.angestellterAnmeldung.Anmeldung;
-import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Abteilung;
-import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Angestellter;
-import jav12Einsendeaufgaben.angestellterAnmeldung.daten.Person;
-
-import java.io.PrintStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -300,7 +294,11 @@ public class DbManager {
 		ConnectionManager.closeConnection();
 	}
 
-	public void cleanup() { 	// neu ab Lektion 5, Wiederholungsaufgaben */
+	/**
+	 * Clears the Cached Objects
+	 * This Method called with the closing Anmeldung window
+	 */
+	public void cleanup() {
 		ConnectionManager.releaseConnection(connection);
 		int size = piPuffer.size();
 		this.listPufferElemente("DbManager#cleanup: vorher:");
@@ -310,6 +308,11 @@ public class DbManager {
 		ConnectionManager.closeConnection();
 	}
 
+	/**
+	 * Lists the Cached Elements
+	 * Mostly for test purposes
+	 * @param message
+	 */
 	public void listPufferElemente(String message){
 		if(piPuffer.isEmpty()){
 			System.out.println("PiPuffer is alread empty!");
@@ -323,6 +326,10 @@ public class DbManager {
 		}
 	}
 
+	/**
+	 * Creates a Vector with Abteilung names
+	 * @return
+	 */
 	public Vector<String> getAbteilungsnamen(){
 		Vector<String> abteilungNames = new Vector<String>();
 		String abteilungNameQuery = "SELECT name FROM abteilungen";
@@ -338,6 +345,11 @@ public class DbManager {
 		return abteilungNames;
 	}
 
+	/**
+	 * Checks the Angestellter if it is an Abteilungsleiter
+	 * @param queryString
+	 * @return
+	 */
 	public boolean checkForAbteilungsleiter(String queryString) {
 		String selectString = queryString;
 		Statement stmt;
