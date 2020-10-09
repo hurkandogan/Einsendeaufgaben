@@ -41,19 +41,6 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 
 	public Angestelltendaten(Frame owner, DbManager dbManager) {
 		super(owner, "Angestelltendaten bearbeiten", true);
-		// dbManager works not properly after Anmeldung Frame.
-		dbManager = null;
-		try {
-			if (dbManager == null) {
-				System.out.println("Verbindung wird aufgebaut");
-				dbManager = new DbManager("localhost", "demo-user", new char[0]);
-				System.out.println("Verbindung erfolgreich aufgebaut");
-			}
-		} catch (ClassNotFoundException cnfe) {
-			System.out.println(cnfe.toString());
-		} catch (SQLException sqle) {
-			System.out.println(sqle.toString());
-		}
 		this.dbManager = dbManager;
 		this.addWindowListener(new WindowAdapter() {
 			@Override
