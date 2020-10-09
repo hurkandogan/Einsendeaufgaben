@@ -39,8 +39,6 @@ public class Angestelltendaten extends JDialog implements ActionListener {
 	private Abteilung abteilung;
 	private Vector<String> abteilungsnamen;
 
-	public Angestelltendaten() {}
-
 	public Angestelltendaten(Frame owner, DbManager dbManager) {
 		super(owner, "Angestelltendaten bearbeiten", true);
 		this.dbManager = dbManager;
